@@ -2,16 +2,17 @@ import React, { useEffect, useMemo, useState } from "react";
 import "./index.css";
 
 /**
- * Creator Portal - App.tsx
- * Single-file TypeScript React app for Creator-facing portal UI mockup.
+ * Updated Creator Portal - App.tsx
+ * - Keeps the original large portal and theme
+ * - Combines Campaigns & Contracts into one section with horizontal card scroller
+ * - Combines Payments into one section with horizontal card scroller
+ * - Communication remains unchanged
  *
- * Built to be dropped into a CodeSandbox / Replit TypeScript React + Tailwind template.
- *
- * Note: This is a front-end mock; interactions update local state (no backend).
+ * Drop into CodeSandbox / Replit TypeScript React + Tailwind template.
  */
 
 /* ---------------------------
-   Mock data definitions
+   Types & Mock Data
    --------------------------- */
 
 type Role = "Creator" | "Microsoft User" | "Admin";
@@ -29,7 +30,7 @@ type Campaign = {
   poc: string;
   timelineAgo: string;
   stage?: CampaignStatusStage;
-  createdAt: number; // timestamp
+  createdAt: number;
   brief: string;
   isBroadcast?: boolean;
   interested?: boolean;
@@ -38,7 +39,7 @@ type Campaign = {
     status: "In Process" | "Resolved";
     note?: string;
   } | null;
-  paymentStatus?: "Under Process" | "Completed";
+  paymentStatus?: "Under Process" | "Completed" | "Awaiting Approval" | "Paid";
 };
 
 type Ticket = {
@@ -49,6 +50,8 @@ type Ticket = {
   messages: { from: "Creator" | "Support"; text: string; time: number }[];
   createdAt: number;
 };
+
+const now = Date.now();
 
 const initialProfile = {
   name: "Rohit Sharma",
@@ -65,7 +68,6 @@ const initialSocials = {
   tiktok: { handle: "@rohit_tt" },
 };
 
-const now = Date.now();
 const seedCampaigns: Campaign[] = [
   {
     id: "CID-1001",
@@ -89,7 +91,12 @@ const seedCampaigns: Campaign[] = [
     brief:
       "Review a sustainable gadget. Deliverables: 1 unboxing + 1 tutorial video. Focus on eco benefits.",
     isBroadcast: false,
-    paymentStatus: "Under Process",
+    paymentStatus: "Awaiting Approval",
+    updateRequest: {
+      id: "UR-101",
+      status: "In Process",
+      note: "Change thumbnail frame",
+    },
   },
   {
     id: "CID-1003",
@@ -112,7 +119,7 @@ const seedCampaigns: Campaign[] = [
     brief:
       "Smart home device launch. Deliverable posted. Link to performance dashboard included.",
     isBroadcast: false,
-    paymentStatus: "Completed",
+    paymentStatus: "Paid",
   },
 ];
 
@@ -158,7 +165,7 @@ const seedTickets: Ticket[] = [
 ];
 
 /* ---------------------------
-   Small helpers
+   Helpers
    --------------------------- */
 
 function timeAgo(ts: number) {
@@ -170,7 +177,7 @@ function timeAgo(ts: number) {
 }
 
 /* ---------------------------
-   UI Components
+   UI: Header & Sidebar (unchanged theme)
    --------------------------- */
 
 const Header: React.FC<{ role: Role }> = ({ role }) => {
@@ -271,7 +278,7 @@ const Sidebar: React.FC<{
 };
 
 /* ---------------------------
-   Profile & Socials
+   Creator Directory components
    --------------------------- */
 
 const ProfileSection: React.FC<{
@@ -288,7 +295,6 @@ const ProfileSection: React.FC<{
 
   return (
     <div className="space-y-4">
-      {/* Contact Info DIV */}
       <div className="p-4 bg-white rounded-lg shadow">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-lg">Contact & Basic Info</h3>
@@ -379,7 +385,6 @@ const ProfileSection: React.FC<{
         )}
       </div>
 
-      {/* Bio DIV */}
       <div className="p-4 bg-white rounded-lg shadow">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-lg">Bio / About</h3>
@@ -436,9 +441,7 @@ const SocialLinks: React.FC<{
   const [local, setLocal] = useState(socials);
   useEffect(() => setLocal(socials), [socials]);
 
-  // Simulate a popup verify (we'll just change state after user confirms)
   const verifyInstagram = () => {
-    // Open fake popup: confirm
     const confirmed = window.confirm(
       "Simulate Instagram verification: allow connecting @instagram?"
     );
@@ -553,7 +556,7 @@ const SocialLinks: React.FC<{
 };
 
 /* ---------------------------
-   Communications - Chat, Notify, Broadcast
+   Communication components (unchanged)
    --------------------------- */
 
 const CampaignChatList: React.FC<{
@@ -713,390 +716,139 @@ const BroadcastList: React.FC<{
 };
 
 /* ---------------------------
-   Campaigns & Contracts
+   Campaigns & Contracts: Combined Horizontal Card Scroller
    --------------------------- */
 
-const CampaignsView: React.FC<{
-  campaigns: Campaign[];
+const CampaignCard: React.FC<{
+  c: Campaign;
   onOpenBrief: (c: Campaign) => void;
-  onAdvanceStage: (id: string, stage: CampaignStatusStage) => void;
-  onMoveToCompleted: (id: string) => void;
-}> = ({ campaigns, onOpenBrief, onAdvanceStage, onMoveToCompleted }) => {
-  // Under Process: stage defined and not Content Posted
-  const underProcess = campaigns.filter(
-    (c) => c.stage && c.stage !== "Content Posted"
-  );
-  const available = campaigns.filter((c) => !c.stage && !c.isBroadcast);
-  const completed = campaigns.filter(
-    (c) => c.stage === "Content Posted" || c.paymentStatus === "Completed"
-  );
-  const updateRequests = campaigns.filter((c) => c.updateRequest);
-
+  onViewProgress: (c: Campaign) => void;
+}> = ({ c, onOpenBrief, onViewProgress }) => {
   return (
-    <div className="space-y-6">
-      {/* Under Process */}
-      <div>
-        <h3 className="text-lg font-semibold mb-2">Under Process</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {underProcess.map((c) => (
-            <div key={c.id} className="p-4 bg-white rounded-lg shadow">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="font-semibold">{c.name}</div>
-                  <div className="text-xs text-gray-500">
-                    {c.id} • {c.poc}
-                  </div>
-                </div>
-                <div className="text-sm text-gray-500">{c.timelineAgo}</div>
-              </div>
-
-              <div className="mt-3">
-                <div className="text-xs text-gray-500">Progress</div>
-                <ProgressTracker
-                  current={c.stage!}
-                  onAdvance={(next) => onAdvanceStage(c.id, next)}
-                />
-              </div>
-
-              <div className="mt-3 flex gap-2">
-                <button
-                  onClick={() => onOpenBrief(c)}
-                  className="px-3 py-1 bg-indigo-600 text-white rounded"
-                >
-                  Open Brief
-                </button>
-                <button
-                  onClick={() => onMoveToCompleted(c.id)}
-                  className="px-3 py-1 border rounded"
-                >
-                  Force Complete
-                </button>
-              </div>
-            </div>
-          ))}
-          {underProcess.length === 0 && (
-            <div className="text-gray-500">No campaigns under process.</div>
-          )}
-        </div>
-      </div>
-
-      {/* Available */}
-      <div>
-        <h3 className="text-lg font-semibold mb-2">Available Invites</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {available.map((c) => (
-            <div
-              key={c.id}
-              className="p-4 bg-white rounded-lg shadow flex items-center justify-between"
-            >
-              <div>
-                <div className="font-semibold">{c.name}</div>
-                <div className="text-xs text-gray-500">
-                  {c.id} • {c.poc}
-                </div>
-                <div className="text-xs text-gray-400 mt-1">
-                  {c.timelineAgo}
-                </div>
-              </div>
-              <div className="flex flex-col gap-2 items-end">
-                <button
-                  onClick={() => onOpenBrief(c)}
-                  className="px-3 py-1 bg-indigo-600 text-white rounded"
-                >
-                  View Brief
-                </button>
-              </div>
-            </div>
-          ))}
-          {available.length === 0 && (
-            <div className="text-gray-500">No available invites.</div>
-          )}
-        </div>
-      </div>
-
-      {/* Completed */}
-      <div>
-        <h3 className="text-lg font-semibold mb-2">Completed / Declined</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {completed.map((c) => (
-            <div key={c.id} className="p-4 bg-white rounded-lg shadow">
-              <div className="flex justify-between">
-                <div>
-                  <div className="font-semibold">{c.name}</div>
-                  <div className="text-xs text-gray-500">
-                    {c.id} • {c.poc}
-                  </div>
-                </div>
-                <div className="text-sm text-gray-500">{c.timelineAgo}</div>
-              </div>
-              <div className="mt-3 text-sm text-gray-600">
-                Status:{" "}
-                <span className="font-medium">
-                  {c.stage ??
-                    (c.paymentStatus === "Completed" ? "Completed" : "Closed")}
-                </span>
-              </div>
-            </div>
-          ))}
-          {completed.length === 0 && (
-            <div className="text-gray-500">No completed campaigns yet.</div>
-          )}
-        </div>
-      </div>
-
-      {/* Update Requests */}
-      <div>
-        <h3 className="text-lg font-semibold mb-2">Update Requests</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {updateRequests.map((c) => (
-            <div key={c.id} className="p-4 bg-white rounded-lg shadow">
-              <div className="flex justify-between">
-                <div>
-                  <div className="font-semibold">{c.name}</div>
-                  <div className="text-xs text-gray-500">
-                    {c.id} • {c.poc}
-                  </div>
-                </div>
-                <div
-                  className={`px-2 py-1 rounded text-sm ${
-                    c.updateRequest!.status === "In Process"
-                      ? "bg-yellow-100 text-yellow-800"
-                      : "bg-green-100 text-green-800"
-                  }`}
-                >
-                  {c.updateRequest!.status}
-                </div>
-              </div>
-              <div className="mt-3 text-sm text-gray-600">
-                {c.updateRequest!.note ??
-                  "Update requested by campaign manager."}
-              </div>
-            </div>
-          ))}
-          {updateRequests.length === 0 && (
-            <div className="text-gray-500">No update requests.</div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const ProgressTracker: React.FC<{
-  current: CampaignStatusStage;
-  onAdvance: (next: CampaignStatusStage) => void;
-}> = ({ current, onAdvance }) => {
-  const stages: CampaignStatusStage[] = [
-    "Accepted",
-    "NDA Signed",
-    "Content Submitted",
-    "Content Approval",
-    "Content Posted",
-  ];
-  const idx = stages.indexOf(current);
-  return (
-    <div>
-      <div className="flex items-center gap-3">
-        {stages.map((s, i) => (
-          <div key={s} className="flex items-center gap-2">
-            <div
-              className={`w-8 h-8 flex items-center justify-center rounded-full ${
-                i <= idx
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-100 text-gray-500"
-              }`}
-            >
-              {i + 1}
-            </div>
-            <div
-              className={`text-sm ${
-                i <= idx ? "text-gray-800 font-semibold" : "text-gray-400"
-              }`}
-            >
-              {s}
-            </div>
+    <div className="min-w-[340px] bg-white rounded-2xl p-4 shadow-lg border hover:shadow-2xl transition">
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="font-semibold text-lg">{c.name}</div>
+          <div className="text-xs text-gray-500">
+            {c.id} • {c.poc}
           </div>
-        ))}
+        </div>
+        <div className="text-sm text-gray-500">{c.timelineAgo}</div>
       </div>
-      <div className="mt-3 flex gap-2">
-        {idx < stages.length - 1 && (
-          <button
-            onClick={() => onAdvance(stages[idx + 1])}
-            className="px-3 py-1 bg-indigo-600 text-white rounded"
+
+      <div className="mt-3">
+        <div className="text-sm text-gray-600">
+          {c.brief.slice(0, 120)}
+          {c.brief.length > 120 ? "..." : ""}
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-center gap-2">
+        <div
+          className={`text-xs px-2 py-1 rounded ${
+            c.stage
+              ? "bg-indigo-50 text-indigo-700"
+              : "bg-gray-100 text-gray-700"
+          }`}
+        >
+          {c.stage ?? (c.isBroadcast ? "Broadcast" : "Invite")}
+        </div>
+        {c.updateRequest && (
+          <div
+            className={`text-xs px-2 py-1 rounded ${
+              c.updateRequest.status === "In Process"
+                ? "bg-yellow-100 text-yellow-800"
+                : "bg-green-100 text-green-800"
+            }`}
           >
-            Mark next: {stages[idx + 1]}
-          </button>
-        )}
-        {idx === stages.length - 1 && (
-          <div className="px-3 py-1 bg-green-100 text-green-800 rounded">
-            Completed
+            {c.updateRequest.status}
           </div>
         )}
+        {c.paymentStatus && (
+          <div
+            className={`text-xs px-2 py-1 rounded ${
+              c.paymentStatus === "Paid"
+                ? "bg-green-100 text-green-800"
+                : "bg-yellow-100 text-yellow-800"
+            }`}
+          >
+            {c.paymentStatus}
+          </div>
+        )}
+      </div>
+
+      <div className="mt-4 flex gap-2">
+        <button
+          onClick={() => onOpenBrief(c)}
+          className="px-3 py-1 bg-indigo-600 text-white rounded"
+        >
+          Open Brief
+        </button>
+        <button
+          onClick={() => onViewProgress(c)}
+          className="px-3 py-1 border rounded"
+        >
+          View Progress
+        </button>
       </div>
     </div>
   );
 };
 
 /* ---------------------------
-   Payments & Tickets
+   Payments: Combined Horizontal Card Scroller
    --------------------------- */
 
-const PaymentInfo: React.FC<{
-  payment: { account: string; ifsc?: string; taxDocument?: string | null };
-  onSave: (p: any) => void;
-}> = ({ payment, onSave }) => {
-  const [editing, setEditing] = useState(false);
-  const [local, setLocal] = useState(payment);
-
-  useEffect(() => setLocal(payment), [payment]);
-
+const PaymentCard: React.FC<{
+  c: Campaign;
+  onRaiseTicket: (campaignId?: string) => void;
+}> = ({ c, onRaiseTicket }) => {
   return (
-    <div className="p-4 bg-white rounded-lg shadow">
-      <div className="flex justify-between items-center">
-        <h3 className="font-semibold">Payment Info & Tax Documentation</h3>
+    <div className="min-w-[320px] bg-white rounded-2xl p-4 shadow-lg border hover:shadow-2xl transition">
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="font-semibold">{c.name}</div>
+          <div className="text-xs text-gray-500">
+            {c.id} • {c.poc}
+          </div>
+        </div>
+        <div className="text-sm text-gray-500">{c.timelineAgo}</div>
+      </div>
+
+      <div className="mt-3 text-sm text-gray-600">
+        Payment Status:{" "}
+        <span className="font-medium">{c.paymentStatus ?? "N/A"}</span>
+      </div>
+
+      <div className="mt-4 flex gap-2">
         <button
-          onClick={() => setEditing((e) => !e)}
-          className="px-3 py-1 rounded bg-indigo-50 text-indigo-700"
+          onClick={() => onRaiseTicket(c.id)}
+          className="px-3 py-1 bg-red-50 text-red-700 rounded"
         >
-          {editing ? "Cancel" : "Update"}
+          Raise Ticket
+        </button>
+        <button
+          onClick={() => alert(`View payment details for ${c.id}`)}
+          className="px-3 py-1 border rounded"
+        >
+          View Details
         </button>
       </div>
-
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div>
-          <label className="text-xs text-gray-500">Bank Account</label>
-          {editing ? (
-            <input
-              value={local.account}
-              onChange={(e) =>
-                setLocal((l: any) => ({ ...l, account: e.target.value }))
-              }
-              className="mt-1 p-2 border rounded w-full"
-            />
-          ) : (
-            <div className="mt-1 p-2 border rounded bg-gray-50">
-              {payment.account}
-            </div>
-          )}
-        </div>
-        <div>
-          <label className="text-xs text-gray-500">IFSC / Routing</label>
-          {editing ? (
-            <input
-              value={local.ifsc}
-              onChange={(e) =>
-                setLocal((l: any) => ({ ...l, ifsc: e.target.value }))
-              }
-              className="mt-1 p-2 border rounded w-full"
-            />
-          ) : (
-            <div className="mt-1 p-2 border rounded bg-gray-50">
-              {payment.ifsc ?? "Not provided"}
-            </div>
-          )}
-        </div>
-
-        <div className="md:col-span-2">
-          <label className="text-xs text-gray-500">Tax Document</label>
-          <div className="mt-2 flex items-center gap-3">
-            <div className="p-2 border rounded bg-gray-50">
-              {payment.taxDocument
-                ? payment.taxDocument
-                : "No tax document uploaded"}
-            </div>
-            {editing && (
-              <button
-                onClick={() => {
-                  const docName = prompt(
-                    "Simulate upload: enter tax doc name (e.g., PAN.pdf)"
-                  );
-                  if (docName)
-                    setLocal((l: any) => ({ ...l, taxDocument: docName }));
-                }}
-                className="px-3 py-1 bg-indigo-600 text-white rounded"
-              >
-                Upload
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {editing && (
-        <div className="mt-4 flex justify-end gap-3">
-          <button
-            onClick={() => {
-              setLocal(payment);
-              setEditing(false);
-            }}
-            className="px-4 py-2 border rounded"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => {
-              onSave(local);
-              setEditing(false);
-            }}
-            className="px-4 py-2 bg-indigo-600 rounded text-white"
-          >
-            Save
-          </button>
-        </div>
-      )}
     </div>
   );
 };
 
-const PaymentStatusList: React.FC<{
-  campaigns: Campaign[];
-  onRaiseTicket: (campaignId: string | undefined) => void;
-}> = ({ campaigns, onRaiseTicket }) => {
-  const list = campaigns.filter((c) => c.paymentStatus);
-  if (list.length === 0)
-    return <div className="text-gray-500">No payment entries yet.</div>;
-  return (
-    <div className="space-y-3">
-      {list.map((c) => (
-        <div
-          key={c.id}
-          className="p-3 bg-white rounded-lg shadow flex items-center justify-between"
-        >
-          <div>
-            <div className="font-semibold">{c.name}</div>
-            <div className="text-xs text-gray-500">
-              {c.id} • {c.poc}
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div
-              className={`px-2 py-1 rounded text-sm ${
-                c.paymentStatus === "Completed"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-yellow-100 text-yellow-800"
-              }`}
-            >
-              {c.paymentStatus}
-            </div>
-            <button
-              title="Raise ticket about payment"
-              onClick={() => onRaiseTicket(c.id)}
-              className="px-2 py-1 bg-gray-100 rounded"
-            >
-              ?
-            </button>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
+/* ---------------------------
+   Payments: Tickets view
+   --------------------------- */
 
 const TicketsView: React.FC<{
   tickets: Ticket[];
   onAddMessage: (ticketId: string, text: string) => void;
 }> = ({ tickets, onAddMessage }) => {
-  const [openTicket, setOpenTicket] = useState<Ticket | null>(null);
+  const [openTicket, setOpenTicket] = useState<Ticket | null>(
+    tickets[0] ?? null
+  );
   const [msg, setMsg] = useState("");
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1195,14 +947,13 @@ const TicketsView: React.FC<{
 };
 
 /* ---------------------------
-   Performance
+   Performance (unchanged placeholder)
    --------------------------- */
 
 const PerformanceView: React.FC<{
   campaigns: Campaign[];
   onOpenCampaignPerf: (campaignId: string) => void;
 }> = ({ campaigns, onOpenCampaignPerf }) => {
-  // Just show placeholders and sample metrics
   const posted = campaigns.filter((c) => c.stage === "Content Posted");
   return (
     <div className="space-y-6">
@@ -1259,7 +1010,6 @@ const PerformanceView: React.FC<{
 export default function App() {
   const [role, setRole] = useState<Role>("Creator");
 
-  // Selected module/sub
   const modules = [
     "Creator Directory",
     "Communication",
@@ -1270,13 +1020,8 @@ export default function App() {
   const subitems: Record<string, string[]> = {
     "Creator Directory": ["View / Update Profile", "Add Social Media Links"],
     Communication: ["Campaign Chat", "Notifications", "Broadcast"],
-    "Campaigns & Contracts": [
-      "Under Process",
-      "Available",
-      "Completed",
-      "Update Requests",
-    ],
-    Payments: ["Payment Info & Tax Documents", "Payment Status", "Tickets"],
+    "Campaigns & Contracts": ["All Campaigns & Contracts"],
+    Payments: ["All Payments & Tickets"],
     Performance: ["Post Engagement", "Contracts", "Payments"],
   };
 
@@ -1286,7 +1031,6 @@ export default function App() {
     "View / Update Profile"
   );
 
-  // Data state
   const [profile, setProfile] = useState(initialProfile);
   const [socials, setSocials] = useState(initialSocials);
   const [campaigns, setCampaigns] = useState<Campaign[]>(seedCampaigns);
@@ -1312,11 +1056,8 @@ export default function App() {
   ]);
   const [chatSearch, setChatSearch] = useState("");
 
-  useEffect(() => {
-    // if any campaign stage gets to Content Posted, automatically mark payment status maybe completed? keep as is
-  }, [campaigns]);
+  useEffect(() => {}, [campaigns]);
 
-  // Handlers
   const saveProfileSection = (
     section: string,
     data: Partial<typeof initialProfile>
@@ -1330,7 +1071,6 @@ export default function App() {
 
   const openChat = (c: Campaign) => {
     setOpenChatCampaign(c);
-    // reset messages for demo
     setChatMessages([
       { from: "User", text: `Chat opened for ${c.id}`, time: Date.now() },
     ]);
@@ -1350,36 +1090,13 @@ export default function App() {
   };
 
   const openBrief = (c: Campaign) => {
-    // switch to campaign & maybe open modal; for now we show brief detail in an alert or panel
     setSelectedModule("Campaigns & Contracts");
-    setSelectedSub("Under Process");
+    setSelectedSub("All Campaigns & Contracts");
     setTimeout(() => alert(`Brief for ${c.id}:\n\n${c.brief}`), 200);
   };
 
-  const advanceStage = (id: string, next: CampaignStatusStage) => {
-    setCampaigns((cs) =>
-      cs.map((c) => {
-        if (c.id === id) {
-          const updated = { ...c, stage: next };
-          if (next === "Content Posted") {
-            // simulate auto move to completed by keeping stage and marking payment status
-            updated.paymentStatus = "Under Process";
-          }
-          return updated;
-        }
-        return c;
-      })
-    );
-  };
-
-  const forceComplete = (id: string) => {
-    setCampaigns((cs) =>
-      cs.map((c) =>
-        c.id === id
-          ? { ...c, stage: "Content Posted", paymentStatus: "Under Process" }
-          : c
-      )
-    );
+  const viewProgress = (c: Campaign) => {
+    alert(`Progress for ${c.id}: ${c.stage ?? "Not started"}`);
   };
 
   const raiseTicket = (campaignId?: string) => {
@@ -1421,10 +1138,6 @@ export default function App() {
     );
   };
 
-  const onAddMessageToTicket = (ticketId: string, text: string) => {
-    addMessageToTicket(ticketId, text);
-  };
-
   const onSavePaymentInfo = (p: any) => {
     setPaymentInfo(p);
     alert("Payment info saved (local)");
@@ -1440,14 +1153,8 @@ export default function App() {
     setTimeout(() => alert(`Opening performance for ${campaignId}`), 200);
   };
 
-  // derived
-  const postedCampaigns = useMemo(
-    () => campaigns.filter((c) => c.stage === "Content Posted"),
-    [campaigns]
-  );
-
   /* ---------------------------
-     Render main content by selected module/sub
+     Render content per selected module/sub
      --------------------------- */
 
   const renderContent = () => {
@@ -1518,7 +1225,7 @@ export default function App() {
                       className="text-left w-full"
                       onClick={() => {
                         setSelectedModule("Campaigns & Contracts");
-                        setSelectedSub("Under Process");
+                        setSelectedSub("All Campaigns & Contracts");
                       }}
                     >
                       • You have been invited to CID-1002 — review brief
@@ -1539,38 +1246,120 @@ export default function App() {
         break;
 
       case "Campaigns & Contracts":
+        // NEW: Combined one-section view with horizontal scroller for campaign cards
         return (
-          <CampaignsView
-            campaigns={campaigns}
-            onOpenBrief={openBrief}
-            onAdvanceStage={(id, next) => advanceStage(id, next)}
-            onMoveToCompleted={(id) => forceComplete(id)}
-          />
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold">All Campaigns & Contracts</h3>
+
+            <div className="bg-white rounded-lg shadow p-4">
+              <div className="text-sm text-gray-500 mb-3">
+                Horizontal scroller — each card is independent and scrolls
+                inside this area.
+              </div>
+              <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-400">
+                {campaigns.map((c) => (
+                  <CampaignCard
+                    key={c.id}
+                    c={c}
+                    onOpenBrief={openBrief}
+                    onViewProgress={viewProgress}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Optional detail sections below — e.g., update requests / quick filters */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 bg-white rounded-lg shadow">
+                <div className="font-semibold mb-2">Broadcasts</div>
+                {campaigns.filter((c) => c.isBroadcast).length === 0 && (
+                  <div className="text-gray-500">No broadcasts</div>
+                )}
+                {campaigns
+                  .filter((c) => c.isBroadcast)
+                  .map((b) => (
+                    <div key={b.id} className="py-2">
+                      <div className="font-medium">{b.name}</div>
+                      <div className="text-xs text-gray-500">{b.id}</div>
+                    </div>
+                  ))}
+              </div>
+
+              <div className="p-4 bg-white rounded-lg shadow">
+                <div className="font-semibold mb-2">Update Requests</div>
+                {campaigns.filter((c) => c.updateRequest).length === 0 && (
+                  <div className="text-gray-500">No update requests</div>
+                )}
+                {campaigns
+                  .filter((c) => c.updateRequest)
+                  .map((c) => (
+                    <div key={c.id} className="py-2">
+                      <div className="font-medium">{c.name}</div>
+                      <div className="text-xs text-gray-500">
+                        {c.updateRequest!.status}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+
+              <div className="p-4 bg-white rounded-lg shadow">
+                <div className="font-semibold mb-2">Quick Actions</div>
+                <button
+                  onClick={() => alert("Export invites (mock)")}
+                  className="px-3 py-1 bg-indigo-600 text-white rounded"
+                >
+                  Export Invites
+                </button>
+                <div className="mt-3">
+                  <button
+                    onClick={() => alert("Filter: recent")}
+                    className="px-3 py-1 border rounded mr-2"
+                  >
+                    Recent
+                  </button>
+                  <button
+                    onClick={() => alert("Filter: posted")}
+                    className="px-3 py-1 border rounded"
+                  >
+                    Posted
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         );
 
       case "Payments":
-        if (selectedSub === "Payment Info & Tax Documents") {
-          return (
-            <PaymentInfo payment={paymentInfo} onSave={onSavePaymentInfo} />
-          );
-        }
-        if (selectedSub === "Payment Status") {
-          return (
-            <PaymentStatusList
-              campaigns={campaigns}
-              onRaiseTicket={(c) => raiseTicket(c)}
-            />
-          );
-        }
-        if (selectedSub === "Tickets") {
-          return (
-            <TicketsView
-              tickets={tickets}
-              onAddMessage={onAddMessageToTicket}
-            />
-          );
-        }
-        break;
+        // NEW: Combined Payments section with horizontal card scroller
+        return (
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold">Payments</h3>
+
+            <div className="bg-white rounded-lg shadow p-4">
+              <div className="text-sm text-gray-500 mb-3">
+                Horizontal scroller — each payment card shows status and quick
+                actions.
+              </div>
+              <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-400">
+                {campaigns.map((c) => (
+                  <PaymentCard
+                    key={c.id}
+                    c={c}
+                    onRaiseTicket={(id) => raiseTicket(id)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-3">Tickets</h4>
+              <TicketsView
+                tickets={tickets}
+                onAddMessage={addMessageToTicket}
+              />
+            </div>
+          </div>
+        );
 
       case "Performance":
         return (
@@ -1616,7 +1405,6 @@ export default function App() {
 
             <div>{renderContent()}</div>
 
-            {/* small footer */}
             <div className="mt-8 text-xs text-gray-400">
               This is a mock UI. All actions are local-state only.
             </div>
