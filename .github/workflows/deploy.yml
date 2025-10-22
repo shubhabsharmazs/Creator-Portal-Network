@@ -2,8 +2,8 @@ name: Deploy Vite App to GitHub Pages
 
 on:
   push:
-    branches: [main]  # runs every time you push to 'main' branch
-  workflow_dispatch:  # allows manual trigger
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -28,7 +28,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
       - name: Install dependencies
         run: npm install
@@ -36,7 +35,7 @@ jobs:
       - name: Build Vite app
         run: npm run build
 
-      - name: Upload build artifacts
+      - name: Upload dist folder
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
