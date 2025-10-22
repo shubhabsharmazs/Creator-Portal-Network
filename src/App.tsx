@@ -1,46 +1,33 @@
 // src/App.tsx
-
 import React, { useState } from "react";
-import { Role } from "./types"; // Get the Role type
-
-// Import the two main application modules
-import MSUserApp from "./MSUserApp";
+import { Role } from "./types";
 import CreatorApp from "./CreatorApp";
+import MSUserApp from "./MSUserApp";
+import Home from "./Home";
 
 const App: React.FC = () => {
-  // Global state to track which portal is currently active
-  const [currentRole, setCurrentRole] = useState<Role>("Creator"); // Start with Creator view
+  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
-  const handleRoleChange = (newRole: Role) => {
-    setCurrentRole(newRole);
-    // Optionally: save role to local storage here
-  };
+  if (!selectedRole) {
+    return <Home onSelectRole={(r) => setSelectedRole(r)} />;
+  }
 
-  const renderApp = () => {
-    switch (currentRole) {
-      case "Creator":
-        // Pass the current role and the setter function down
-        return (
-          <CreatorApp
-            initialRole={currentRole}
-            onRoleChange={handleRoleChange}
-          />
-        );
-      case "Microsoft User":
-      case "Admin":
-        // Pass the current role and the setter function down
-        return (
-          <MSUserApp
-            initialRole={currentRole}
-            onRoleChange={handleRoleChange}
-          />
-        );
-      default:
-        return <div>Invalid Role Selected</div>;
-    }
-  };
-
-  return <div className="App">{renderApp()}</div>;
+  switch (selectedRole) {
+    case "Creator":
+      return (
+        <CreatorApp initialRole="Creator" onRoleChange={setSelectedRole} />
+      );
+    case "Microsoft User":
+    case "Admin":
+      return (
+        <MSUserApp
+          initialRole="Microsoft User"
+          onRoleChange={setSelectedRole}
+        />
+      );
+    default:
+      return <Home onSelectRole={(r) => setSelectedRole(r)} />;
+  }
 };
 
 export default App;

@@ -332,6 +332,7 @@ const Sidebar: React.FC<{
   onSelectSub: (s: string) => void;
   role: Role;
   setRole: (r: Role) => void;
+  onRoleChange?: (r: Role) => void;
 }> = ({
   modules,
   selected,
@@ -341,6 +342,7 @@ const Sidebar: React.FC<{
   onSelectSub,
   role,
   setRole,
+  onRoleChange,
 }) => (
   <aside className="w-80 bg-white border-r min-h-screen">
     <div className="p-4 border-b">
@@ -349,7 +351,10 @@ const Sidebar: React.FC<{
         <select
           className="w-full border rounded px-2 py-1"
           value={role}
-          onChange={(e) => setRole(e.target.value as Role)}
+          onChange={(e) => {
+            setRole(e.target.value as Role);
+            onRoleChange(e.target.value as Role);
+          }}
         >
           <option>Creator</option>
           <option>Microsoft User</option>
@@ -1305,8 +1310,14 @@ const CommunicationsModule: React.FC<{
 /* ---------------------------
    Main App
 ----------------------------*/
-export default function App() {
-  const [role, setRole] = useState<Role>("Creator");
+export default function CreatorApp({
+  initialRole,
+  onRoleChange,
+}: {
+  initialRole: Role;
+  onRoleChange: (r: Role) => void;
+}) {
+  const [role, setRole] = useState<Role>(initialRole);
 
   const modules = [
     "Creator Directory",
