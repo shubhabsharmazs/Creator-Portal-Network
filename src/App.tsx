@@ -496,7 +496,7 @@ const CampaignCard: React.FC<{
 const ProgressTracker: React.FC<{
   stage?: CampaignStage;
   onAdvance: (next: CampaignStage) => void;
-}> = ({ stage, onAdvance }) => {
+}> = ({ stage }) => {
   const stages: CampaignStage[] = [
     "Accepted",
     "Content Sent",
@@ -512,36 +512,22 @@ const ProgressTracker: React.FC<{
           <div key={s} className="flex items-center gap-3">
             <div
               className={`w-8 h-8 flex items-center justify-center rounded-full ${
-                i <= idx
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-100 text-gray-500"
+                i <= idx ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-500"
               }`}
             >
               {i + 1}
             </div>
-            <div
-              className={`${
-                i <= idx ? "font-semibold text-gray-800" : "text-gray-400"
-              }`}
-            >
+            <div className={`${i <= idx ? "font-semibold text-gray-800" : "text-gray-400"}`}>
               {s}
             </div>
           </div>
         ))}
       </div>
       <div className="mt-3">
-        {idx < stages.length - 1 ? (
-          <button
-            onClick={() => onAdvance(stages[idx + 1])}
-            className="px-3 py-1 bg-indigo-600 text-white rounded"
-          >
-            Mark next: {stages[idx + 1]}
-          </button>
-        ) : (
-          <div className="px-3 py-1 bg-green-100 text-green-800 rounded">
-            Completed (Post Approval)
-          </div>
-        )}
+        {/* Progress is display-only in creator view (no manual advance) */}
+        <div className="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm">
+          Current: {stage ?? "Invite"}
+        </div>
       </div>
     </div>
   );
@@ -1067,10 +1053,7 @@ const socialsExample = {
 };
 
 /* Communications module (unchanged) */
-const CommunicationsModule: React.FC<{
-  campaigns: Campaign[];
-  openBrief: (c: Campaign) => void;
-}> = ({ campaigns, openBrief }) => {
+const CommunicationsModule: React.FC<{ campaigns: Campaign[]; openBrief: (c: Campaign) => void; activeChatCampaignId?: string | null }> = ({ campaigns, openBrief, activeChatCampaignId }) => {
   // Keep simple but consistent with earlier implementation; left unchanged in behavior
   return (
     <div className="space-y-4">
@@ -1100,7 +1083,20 @@ const CommunicationsModule: React.FC<{
           <div className="md:flex-1">
             <div className="font-semibold">Messages</div>
             <div className="mt-3 p-4 bg-gray-50 rounded h-64 overflow-auto">
-              Select a campaign to view chat (demo unchanged).
+              {activeChatCampaignId ? (
+                (() => {
+                  const c = campaigns.find(x => x.id === activeChatCampaignId);
+                  return c ? (
+                    <div>
+                      <div className="font-semibold">Chat — {c.name}</div>
+                      <div className="text-xs text-gray-500">Only enabled for accepted/ongoing campaigns.</div>
+                      <div className="mt-3 text-sm text-gray-600">This is a demo chat window for <b>{c.id}</b>. Messages would appear here.</div>
+                    </div>
+                  ) : <div className="text-sm text-gray-500">Selected campaign not found.</div>;
+                })()
+              ) : (
+                <div className="text-sm text-gray-500">Select a campaign to view chat (demo unchanged).</div>
+              )}
             </div>
           </div>
         </div>
@@ -1113,6 +1109,23 @@ const CommunicationsModule: React.FC<{
    Main App
 ----------------------------*/
 export default function App() {
+
+  // --- Added state: active chat and payment modal campaign (injected by assistant)
+  const [activeChatCampaignId, setActiveChatCampaignId] = useState<string | null>(null);
+  const [paymentModalCampaign, setPaymentModalCampaign] = useState<Campaign | null>(null);
+
+  // Open chat handler: navigate to Communication and set active chat campaign id
+  const openChat = (campaignId: string) => {
+    setSelectedModule("Communication");
+    setActiveChatCampaignId(campaignId);
+  };
+
+  // Handle payment status click: navigate to Payments and open payment modal for campaign
+  const handlePaymentStatusClick = (campaign: Campaign) => {
+    setSelectedModule("Payments");
+    setPaymentModalCampaign(campaign);
+  };
+
   const [role, setRole] = useState<Role>("Creator");
 
   const modules = [
@@ -1797,11 +1810,27 @@ export default function App() {
             )}
             {completedFiltered.map((c) => (
               <div key={c.id} className="inline-block mr-3">
-                <CampaignCard
-                  c={c}
-                  onOpenBrief={openBriefModal}
-                  onViewProgress={() => alert(`View final status for ${c.id}`)}
-                />
+                <div className={`${cardMinWidth} ${cardHeight} bg-white rounded-2xl p-4 shadow-lg border`}>
+                  <div>
+                    <div className="font-semibold text-lg">{c.name}</div>
+                    <div className="text-xs text-gray-500">{c.id} • {c.poc}</div>
+                    <div className="mt-2 text-sm text-gray-600 line-clamp-3">{c.brief}</div>
+                  </div>
+                  <div className="mt-3 flex gap-2 justify-between items-center">
+                    <button
+                      onClick={() => openBriefModal(c)}
+                      className="px-3 py-1 bg-indigo-600 text-white rounded"
+                    >
+                      Open Brief
+                    </button>
+                    <button
+                      onClick={() => handlePaymentStatusClick(c)}
+                      className="px-3 py-1 border rounded"
+                    >
+                      Payment Status
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
             {Array.from({
@@ -1822,7 +1851,7 @@ export default function App() {
   };
 
   /* Render Payments module */
-  const PaymentsModule = () => (
+  const PaymentsModule = ({ campaignToShow, clearCampaignToShow }: { campaignToShow?: Campaign | null; clearCampaignToShow?: () => void }) => (
     <div className="space-y-6">
       <h2 className="text-lg font-semibold">Payments</h2>
 
@@ -1888,10 +1917,37 @@ export default function App() {
         <h4 className="font-semibold mb-3">Tickets</h4>
         <TicketsView tickets={tickets} onAddMessage={addMessageToTicket} />
       </div>
-    </div>
-  );
 
-  /* Creator Directory module render */
+      {/* Payment Details Modal - opens when campaignToShow is provided */}
+      <Modal
+        open={!!campaignToShow}
+        onClose={() => {
+          if (clearCampaignToShow) clearCampaignToShow();
+        }}
+        title="Payment Details"
+      >
+        {campaignToShow && (
+          <div className="space-y-3 text-sm text-gray-700">
+            <div><b>Campaign:</b> {campaignToShow.name}</div>
+            <div><b>ID:</b> {campaignToShow.id}</div>
+            <div><b>Amount:</b> {campaignToShow.amount ?? "₹ —"}</div>
+            <div><b>Status:</b> {campaignToShow.paymentStatus ?? "Under Process"}</div>
+            <div><b>Transaction ID:</b> TXN-{campaignToShow.id.slice(-4)}-XYZ</div>
+            <div><b>Mode:</b> Bank Transfer</div>
+            <div><b>Invoice Date:</b> {new Date(Date.now() - 86400000 * 2).toLocaleDateString()}</div>
+            <div><b>Expected Date:</b> {new Date(Date.now() + 86400000 * 5).toLocaleDateString()}</div>
+
+            <div className="pt-3 flex justify-end gap-3">
+              <button onClick={() => alert("Invoice download started (demo)")} className="px-3 py-1 bg-indigo-500 text-white rounded">Download Invoice</button>
+              <button onClick={() => { raiseTicket(campaignToShow.id); alert("Ticket raised (demo)") }} className="px-3 py-1 border rounded">Raise Ticket</button>
+            </div>
+
+            <div className="pt-3 text-center text-gray-500 italic">Thank you for your collaboration. Payment is being processed as per schedule.</div>
+          </div>
+        )}
+      </Modal>
+    </div>
+  );/* Creator Directory module render */
   const CreatorDirectoryModule = () => (
     <CreatorDirectory
       profile={profile}
@@ -1921,12 +1977,13 @@ export default function App() {
           <CommunicationsModule
             campaigns={campaigns}
             openBrief={openBriefModal}
+            activeChatCampaignId={activeChatCampaignId}
           />
         );
       case "Campaigns & Contracts":
         return renderCampaignsModule();
       case "Payments":
-        return <PaymentsModule />;
+        return <PaymentsModule campaignToShow={paymentModalCampaign} clearCampaignToShow={() => setPaymentModalCampaign(null)} />;
       case "Performance":
         return <PerformanceModule />;
       default:
