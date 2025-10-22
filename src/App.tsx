@@ -1,17 +1,17 @@
+// App.tsx — COMBINED (PART 1 of 2)
+// Paste Part 1, then Part 2 right after in the same file.
+
 import React, { useEffect, useMemo, useState } from "react";
 import "./index.css";
 
 /**
- * Final Creator Portal - App.tsx
- * - Blue theme preserved
- * - Creator Directory (profile + social links verification)
- * - Communication (unchanged)
- * - Campaigns & Contracts: four horizontal strips (Ongoing, Available, Update Requests, Completed)
- *   - Available has search + date filter
- *   - Open Brief is letter-style modal; Accept / Decline (reason) / Update Request (message to POC)
- * - Payments: Payment Info editable + Payment Status strip (search + status filter) + tickets
+ * Creator Portal — Final combined App.tsx (Part 1)
  *
- * All data is mocked and local-state only. Tailwind required.
+ * - Full single-file UI split across two messages (Part 1 then Part 2)
+ * - Tailwind CSS assumed
+ *
+ * Part 1 contains: types, helpers, mock data, Header, Sidebar, Modal, CreatorDirectory,
+ * Communications, Notifications, and shared bits used by Part 2.
  */
 
 /* ---------------------------
@@ -63,6 +63,14 @@ type Ticket = {
   createdAt: number;
 };
 
+type NotificationItem = {
+  id: string;
+  text: string;
+  time: number;
+  read?: boolean;
+  type?: "payment" | "invite" | "update" | "system";
+};
+
 /* ---------------------------
    Helpers
 ----------------------------*/
@@ -94,9 +102,8 @@ function withinRange(createdAt: number, filter: string) {
 }
 
 /* ---------------------------
-   Mock Data generation (10+ cards per strip)
+   Mock Data (campaigns, notifications, tickets)
 ----------------------------*/
-
 const baseAvailable = [
   {
     name: "Autumn Fashion Drop",
@@ -200,7 +207,7 @@ const baseCompleted = [
 
 function makeMockCampaigns() {
   const campaigns: Campaign[] = [];
-  // create 10 available by repeating baseAvailable variations
+  // 10 available
   for (let i = 0; i < 10; i++) {
     const b = baseAvailable[i % baseAvailable.length];
     campaigns.push({
@@ -212,10 +219,10 @@ function makeMockCampaigns() {
       deliverables: b.deliverables,
       amount: b.amount,
       offering: b.offering,
-      isNew: i < 3, // first few are new
+      isNew: i < 3,
     });
   }
-  // ongoing
+  // 6 ongoing
   for (let i = 0; i < 6; i++) {
     const b = baseOngoing[i % baseOngoing.length];
     campaigns.push({
@@ -233,7 +240,7 @@ function makeMockCampaigns() {
       paymentStatus: b.paymentStatus,
     });
   }
-  // completed
+  // 4 completed
   for (let i = 0; i < 4; i++) {
     const b = baseCompleted[i % baseCompleted.length];
     campaigns.push({
@@ -249,51 +256,129 @@ function makeMockCampaigns() {
       paymentStatus: "Paid",
     });
   }
-  // add some update request examples
-  campaigns[12].updateRequests = [
-    {
-      id: "UR-101",
-      from: "creator",
-      message: "Please update logo placement.",
-      time: now - 1000 * 60 * 60 * 24,
-    },
-  ];
-  campaigns[3].updateRequests = [
-    {
-      id: "UR-102",
-      from: "creator",
-      message: "Need higher res asset for thumbnail.",
-      time: now - 1000 * 60 * 60 * 6,
-    },
-  ];
+  // add some update requests to few
+  if (campaigns[12]) {
+    campaigns[12].updateRequests = [
+      {
+        id: "UR-101",
+        from: "creator",
+        message: "Please update logo placement.",
+        time: now - 1000 * 60 * 60 * 24,
+      },
+    ];
+  }
+  if (campaigns[3]) {
+    campaigns[3].updateRequests = [
+      {
+        id: "UR-102",
+        from: "creator",
+        message: "Need higher res asset for thumbnail.",
+        time: now - 1000 * 60 * 60 * 6,
+      },
+    ];
+  }
   return campaigns;
 }
 
-/* tickets */
-const seedTickets: Ticket[] = [
-  {
-    id: "T-001",
-    campaignId: makeId(201),
-    subject: "Payment not received",
-    status: "Under Process",
-    messages: [
-      {
-        from: "Creator",
-        text: "Payment expected but not received.",
-        time: now - 1000 * 60 * 60 * 48,
-      },
-      {
-        from: "Support",
-        text: "Finance checking, will update.",
-        time: now - 1000 * 60 * 60 * 36,
-      },
-    ],
-    createdAt: now - 1000 * 60 * 60 * 48,
-  },
-];
+/* Notifications */
+function makeNotifications() {
+  const list: NotificationItem[] = [
+    {
+      id: "N-001",
+      text: "Payment processed for CID-1009",
+      time: now - 1000 * 60 * 60 * 24 * 3,
+      type: "payment",
+    },
+    {
+      id: "N-002",
+      text: "New invite: Autumn Fashion Drop #1",
+      time: now - 1000 * 60 * 60 * 24 * 5,
+      type: "invite",
+    },
+    {
+      id: "N-003",
+      text: "Payment under process for CID-1101",
+      time: now - 1000 * 60 * 60 * 24 * 1,
+      type: "payment",
+    },
+    {
+      id: "N-004",
+      text: "Update request resolved for CID-1012",
+      time: now - 1000 * 60 * 60 * 36,
+      type: "update",
+    },
+    {
+      id: "N-005",
+      text: "Campaign accepted: Smart Home Launch - Run 1",
+      time: now - 1000 * 60 * 60 * 72,
+      type: "system",
+    },
+    {
+      id: "N-006",
+      text: "New invite: Eco Gadget Review #3",
+      time: now - 1000 * 60 * 60 * 24 * 2,
+      type: "invite",
+    },
+    {
+      id: "N-007",
+      text: "Payment received for CID-2001",
+      time: now - 1000 * 60 * 60 * 24 * 7,
+      type: "payment",
+    },
+    {
+      id: "N-008",
+      text: "Ticket T-005 updated by Support",
+      time: now - 1000 * 60 * 60 * 12,
+      type: "system",
+    },
+    {
+      id: "N-009",
+      text: "New invite: Winter Skincare Invite #2",
+      time: now - 1000 * 60 * 60 * 24 * 4,
+      type: "invite",
+    },
+    {
+      id: "N-010",
+      text: "Payment initiation for CID-1010",
+      time: now - 1000 * 60 * 60 * 48,
+      type: "payment",
+    },
+    {
+      id: "N-011",
+      text: "Campaign brief updated: Fitness App Collab",
+      time: now - 1000 * 60 * 60 * 18,
+      type: "update",
+    },
+    {
+      id: "N-012",
+      text: "Reminder: Submit draft for CID-1003",
+      time: now - 1000 * 60 * 60 * 6,
+      type: "system",
+    },
+    {
+      id: "N-013",
+      text: "Payment delay notification: CID-1103",
+      time: now - 1000 * 60 * 60 * 24 * 9,
+      type: "payment",
+    },
+    {
+      id: "N-014",
+      text: "New invite: Home Decor Series #5",
+      time: now - 1000 * 60 * 60 * 24 * 11,
+      type: "invite",
+    },
+    {
+      id: "N-015",
+      text: "Support message: Ticket T-002 resolved",
+      time: now - 1000 * 60 * 60 * 30,
+      type: "system",
+    },
+  ];
+  return list;
+}
 
 /* ---------------------------
-   Components
+   Components (Part 1)
 ----------------------------*/
 
 /* Header */
@@ -417,374 +502,18 @@ const Modal: React.FC<{
   );
 };
 
-/* Uniform card styles: min width and fixed height so cards are same size */
+/* Uniform card sizes */
 const cardMinWidth = "min-w-[360px]";
 const cardHeight = "h-56";
 
-/* Campaign Card */
-const CampaignCard: React.FC<{
-  c: Campaign;
-  onOpenBrief?: (c: Campaign) => void;
-  onViewProgress?: (c: Campaign) => void;
-  showActions?: boolean;
-}> = ({ c, onOpenBrief, onViewProgress, showActions = false }) => {
-  return (
-    <div
-      className={`${cardMinWidth} ${cardHeight} bg-white rounded-2xl p-4 shadow-lg border hover:shadow-2xl transition flex flex-col justify-between`}
-    >
-      <div>
-        <div className="font-semibold text-lg">{c.name}</div>
-        <div className="text-xs text-gray-500">
-          {c.id} • {c.poc}
-        </div>
-        <div className="mt-2 text-sm text-gray-600 line-clamp-3">{c.brief}</div>
-      </div>
-
-      <div className="flex items-center justify-between mt-3">
-        <div className="flex items-center gap-2">
-          <div
-            className={`text-xs px-2 py-1 rounded ${
-              c.stage
-                ? "bg-indigo-50 text-indigo-700"
-                : "bg-gray-100 text-gray-700"
-            }`}
-          >
-            {c.stage ?? "Invite"}
-          </div>
-          {c.paymentStatus && (
-            <div
-              className={`text-xs px-2 py-1 rounded ${
-                c.paymentStatus === "Paid"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-yellow-100 text-yellow-800"
-              }`}
-            >
-              {c.paymentStatus}
-            </div>
-          )}
-          {c.isNew && (
-            <div className="text-xs px-2 py-1 rounded bg-green-100 text-green-800">
-              New
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
-          {onOpenBrief && (
-            <button
-              onClick={() => onOpenBrief(c)}
-              className="px-3 py-1 bg-indigo-600 text-white rounded"
-            >
-              Open Brief
-            </button>
-          )}
-          {onViewProgress && (
-            <button
-              onClick={() => onViewProgress(c)}
-              className="px-3 py-1 border rounded"
-            >
-              View Progress
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+/* Creator Directory component (profile + socials) */
+const socialsDefault = {
+  instagram: { handle: "@creator_ig", verified: false },
+  facebook: { handle: "Creator FB" },
+  threads: { handle: "@creator_threads" },
+  tiktok: { handle: "@creator_tt" },
 };
 
-/* Progress Tracker component */
-const ProgressTracker: React.FC<{
-  stage?: CampaignStage;
-  onAdvance: (next: CampaignStage) => void;
-}> = ({ stage, onAdvance }) => {
-  const stages: CampaignStage[] = [
-    "Accepted",
-    "Content Sent",
-    "Approval",
-    "Content Posted Confirmation Sent",
-    "Post Approval",
-  ];
-  const idx = stage ? stages.indexOf(stage) : -1;
-  return (
-    <div>
-      <div className="flex items-center gap-6 overflow-auto">
-        {stages.map((s, i) => (
-          <div key={s} className="flex items-center gap-3">
-            <div
-              className={`w-8 h-8 flex items-center justify-center rounded-full ${
-                i <= idx
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-100 text-gray-500"
-              }`}
-            >
-              {i + 1}
-            </div>
-            <div
-              className={`${
-                i <= idx ? "font-semibold text-gray-800" : "text-gray-400"
-              }`}
-            >
-              {s}
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="mt-3">
-        {idx < stages.length - 1 ? (
-          <button
-            onClick={() => onAdvance(stages[idx + 1])}
-            className="px-3 py-1 bg-indigo-600 text-white rounded"
-          >
-            Mark next: {stages[idx + 1]}
-          </button>
-        ) : (
-          <div className="px-3 py-1 bg-green-100 text-green-800 rounded">
-            Completed (Post Approval)
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-/* Payment Card - same size as campaign cards */
-const PaymentCard: React.FC<{
-  c: Campaign;
-  onRaiseTicket: (campaignId?: string) => void;
-}> = ({ c, onRaiseTicket }) => (
-  <div
-    className={`${cardMinWidth} ${cardHeight} bg-white rounded-2xl p-4 shadow-lg border hover:shadow-2xl transition flex flex-col justify-between`}
-  >
-    <div>
-      <div className="font-semibold">{c.name}</div>
-      <div className="text-xs text-gray-500">
-        {c.id} • {c.poc}
-      </div>
-      <div className="mt-2 text-sm text-gray-600">
-        Payment: <span className="font-medium">{c.paymentStatus ?? "N/A"}</span>
-      </div>
-    </div>
-    <div className="flex items-center justify-between mt-3">
-      <button
-        onClick={() => onRaiseTicket(c.id)}
-        className="px-3 py-1 bg-red-50 text-red-700 rounded"
-      >
-        Raise Ticket
-      </button>
-      <button
-        onClick={() => alert(`View payment details for ${c.id}`)}
-        className="px-3 py-1 border rounded"
-      >
-        View Details
-      </button>
-    </div>
-  </div>
-);
-
-/* Tickets view */
-const TicketsView: React.FC<{
-  tickets: Ticket[];
-  onAddMessage: (ticketId: string, text: string) => void;
-}> = ({ tickets, onAddMessage }) => {
-  const [open, setOpen] = useState<Ticket | null>(tickets[0] ?? null);
-  const [msg, setMsg] = useState("");
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div className="col-span-1">
-        <div className="p-3 bg-white rounded-lg shadow">
-          <h4 className="font-semibold mb-2">Tickets</h4>
-          <div className="space-y-2">
-            {tickets.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setOpen(t)}
-                className={`block w-full text-left p-2 rounded ${
-                  open?.id === t.id ? "bg-indigo-50" : "hover:bg-gray-100"
-                }`}
-              >
-                <div className="font-medium">{t.subject}</div>
-                <div className="text-xs text-gray-500">
-                  {t.id} • {t.campaignId ?? "General"}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="col-span-2">
-        <div className="p-4 bg-white rounded-lg shadow">
-          {open ? (
-            <>
-              <div className="flex justify-between items-center mb-3">
-                <div>
-                  <div className="font-semibold">{open.subject}</div>
-                  <div className="text-xs text-gray-500">{open.id}</div>
-                </div>
-                <div
-                  className={`px-2 py-1 rounded ${
-                    open.status === "Resolved"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-yellow-100 text-yellow-800"
-                  }`}
-                >
-                  {open.status}
-                </div>
-              </div>
-
-              <div className="h-64 overflow-auto border rounded p-3 space-y-2 mb-3">
-                {open.messages.map((m, i) => (
-                  <div
-                    key={i}
-                    className={`p-2 rounded ${
-                      m.from === "Creator"
-                        ? "bg-indigo-50 self-end"
-                        : "bg-gray-100"
-                    }`}
-                  >
-                    <div className="text-sm font-medium">{m.from}</div>
-                    <div className="text-sm">{m.text}</div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      {timeAgo(m.time)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex gap-2">
-                <input
-                  value={msg}
-                  onChange={(e) => setMsg(e.target.value)}
-                  className="flex-1 p-2 border rounded"
-                  placeholder="Write a message..."
-                />
-                <button
-                  onClick={() => {
-                    if (!msg.trim()) return;
-                    onAddMessage(open.id, msg.trim());
-                    setMsg("");
-                  }}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded"
-                >
-                  Send
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="text-gray-500">
-              Select a ticket to view conversation
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/* Payment Info form */
-const PaymentInfoForm: React.FC<{
-  payment: { account: string; ifsc?: string; taxDocument?: string | null };
-  onSave: (p: any) => void;
-}> = ({ payment, onSave }) => {
-  const [editing, setEditing] = useState(false);
-  const [local, setLocal] = useState(payment);
-  useEffect(() => setLocal(payment), [payment]);
-  return (
-    <div className="p-4 bg-white rounded-lg shadow">
-      <div className="flex justify-between items-center">
-        <h3 className="font-semibold">Payment Info & Tax Documentation</h3>
-        <button
-          onClick={() => setEditing((e) => !e)}
-          className="px-3 py-1 rounded bg-indigo-50 text-indigo-700"
-        >
-          {editing ? "Cancel" : "Edit"}
-        </button>
-      </div>
-
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div>
-          <label className="text-xs text-gray-500">Bank Account</label>
-          {editing ? (
-            <input
-              value={local.account}
-              onChange={(e) =>
-                setLocal((l: any) => ({ ...l, account: e.target.value }))
-              }
-              className="mt-1 p-2 border rounded w-full"
-            />
-          ) : (
-            <div className="mt-1 p-2 border rounded bg-gray-50">
-              {payment.account}
-            </div>
-          )}
-        </div>
-        <div>
-          <label className="text-xs text-gray-500">IFSC / Routing</label>
-          {editing ? (
-            <input
-              value={local.ifsc}
-              onChange={(e) =>
-                setLocal((l: any) => ({ ...l, ifsc: e.target.value }))
-              }
-              className="mt-1 p-2 border rounded w-full"
-            />
-          ) : (
-            <div className="mt-1 p-2 border rounded bg-gray-50">
-              {payment.ifsc ?? "Not provided"}
-            </div>
-          )}
-        </div>
-
-        <div className="md:col-span-2">
-          <label className="text-xs text-gray-500">Tax Document</label>
-          <div className="mt-2 flex items-center gap-3">
-            <div className="p-2 border rounded bg-gray-50">
-              {payment.taxDocument ?? "No tax document uploaded"}
-            </div>
-            {editing && (
-              <button
-                onClick={() => {
-                  const doc = prompt(
-                    "Enter tax document name (simulate upload)"
-                  );
-                  if (doc) setLocal((l: any) => ({ ...l, taxDocument: doc }));
-                }}
-                className="px-3 py-1 bg-indigo-600 text-white rounded"
-              >
-                Upload
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {editing && (
-        <div className="mt-4 flex justify-end gap-3">
-          <button
-            onClick={() => {
-              setLocal(payment);
-              setEditing(false);
-            }}
-            className="px-4 py-2 border rounded"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => {
-              onSave(local);
-              setEditing(false);
-            }}
-            className="px-4 py-2 bg-indigo-600 text-white rounded"
-          >
-            Save
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
-
-/* Creator Directory (profile + social links) */
 const CreatorDirectory: React.FC<{
   profile: any;
   onSaveProfile: (section: string, data: any) => void;
@@ -794,18 +523,12 @@ const CreatorDirectory: React.FC<{
   const [editing, setEditing] = useState<Record<string, boolean>>({});
   const [localProfile, setLocalProfile] = useState(profile);
   const [localSocials, setLocalSocials] = useState(socials);
+  const [verifyOpen, setVerifyOpen] = useState(false);
+
   useEffect(() => setLocalProfile(profile), [profile]);
   useEffect(() => setLocalSocials(socials), [socials]);
 
-  // Instagram verify modal state
-  const [verifyOpen, setVerifyOpen] = useState(false);
-
-  const verifyInstagram = () => {
-    setVerifyOpen(true);
-  };
-
   const confirmInstagram = () => {
-    // simulate verification
     setLocalSocials((s: any) => ({
       ...s,
       instagram: { ...s.instagram, verified: true },
@@ -928,7 +651,7 @@ const CreatorDirectory: React.FC<{
         )}
       </div>
 
-      {/* Socials — kept on same page but not as separate sidebar item */}
+      {/* Socials */}
       <div className="bg-white rounded-lg shadow p-4">
         <div className="flex items-center justify-between">
           <div className="font-semibold">Social Media Links</div>
@@ -950,7 +673,7 @@ const CreatorDirectory: React.FC<{
                 }
               />
               <button
-                onClick={verifyInstagram}
+                onClick={() => setVerifyOpen(true)}
                 className={`px-3 py-1 rounded ${
                   localSocials.instagram.verified
                     ? "bg-green-500 text-white"
@@ -1008,7 +731,7 @@ const CreatorDirectory: React.FC<{
         <div className="mt-4 flex justify-end gap-3">
           <button
             onClick={() => {
-              setLocalSocials(socialsExample);
+              setLocalSocials(socialsDefault);
             }}
             className="px-4 py-2 border rounded"
           >
@@ -1026,7 +749,7 @@ const CreatorDirectory: React.FC<{
         </div>
       </div>
 
-      {/* Instagram verification modal */}
+      {/* Instagram verify modal */}
       <Modal
         open={verifyOpen}
         onClose={() => setVerifyOpen(false)}
@@ -1058,63 +781,556 @@ const CreatorDirectory: React.FC<{
   );
 };
 
-/* Placeholder social defaults */
-const socialsExample = {
-  instagram: { handle: "@creator_ig", verified: false },
-  facebook: { handle: "Creator FB" },
-  threads: { handle: "@creator_threads" },
-  tiktok: { handle: "@creator_tt" },
-};
-
-/* Communications module (unchanged) */
+/* Communications Module (unchanged core) */
 const CommunicationsModule: React.FC<{
   campaigns: Campaign[];
-  openBrief: (c: Campaign) => void;
-}> = ({ campaigns, openBrief }) => {
-  // Keep simple but consistent with earlier implementation; left unchanged in behavior
+  onOpenCampaignChat: (campaignId: string) => void;
+  notifications: NotificationItem[];
+}> = ({ campaigns, onOpenCampaignChat, notifications }) => {
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(
+    null
+  );
+  const [messages, setMessages] = useState<
+    { from: "Creator" | "User"; text: string; time: number }[]
+  >([
+    {
+      from: "User",
+      text: "Welcome to campaign chat (demo)",
+      time: now - 1000 * 60 * 60 * 5,
+    },
+  ]);
+  const [text, setText] = useState("");
+
+  useEffect(() => {
+    if (selectedCampaignId) {
+      onOpenCampaignChat(selectedCampaignId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCampaignId]);
+
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">Communication</h2>
+
       <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="md:w-1/3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="md:col-span-1">
             <div className="font-semibold">Campaigns</div>
-            <div className="mt-3 space-y-2">
-              {campaigns.slice(0, 6).map((c) => (
-                <div key={c.id} className="p-3 bg-indigo-50 rounded-lg">
-                  <div className="font-medium">{c.name}</div>
-                  <div className="text-xs text-gray-500">{c.id}</div>
-                  <div className="mt-2">
-                    <button
-                      onClick={() => openBrief(c)}
-                      className="px-3 py-1 bg-indigo-600 text-white rounded text-sm"
-                    >
-                      Open Brief
-                    </button>
+            <div className="mt-3 space-y-2 max-h-96 overflow-auto">
+              {campaigns.map((c) => (
+                <div
+                  key={c.id}
+                  className="p-2 rounded hover:bg-gray-100 flex items-center justify-between"
+                >
+                  <div>
+                    <div className="font-medium text-sm">{c.name}</div>
+                    <div className="text-xs text-gray-500">{c.id}</div>
+                  </div>
+                  <div>
+                    {/* Only show Open Chat if campaign is accepted (ongoing) */}
+                    {c.stage && c.stage !== "Post Approval" ? (
+                      <button
+                        onClick={() => setSelectedCampaignId(c.id)}
+                        className="px-2 py-1 bg-indigo-600 text-white rounded text-xs"
+                      >
+                        Open Chat
+                      </button>
+                    ) : (
+                      <div className="text-xs text-gray-400">No chat</div>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="md:flex-1">
-            <div className="font-semibold">Messages</div>
-            <div className="mt-3 p-4 bg-gray-50 rounded h-64 overflow-auto">
-              Select a campaign to view chat (demo unchanged).
+          <div className="md:col-span-2">
+            <div className="font-semibold">Chat</div>
+            <div className="mt-3 p-4 bg-gray-50 rounded h-72 overflow-auto">
+              {messages.map((m, i) => (
+                <div
+                  key={i}
+                  className={`mb-2 p-2 rounded ${
+                    m.from === "Creator"
+                      ? "bg-indigo-50 self-end"
+                      : "bg-gray-100"
+                  }`}
+                >
+                  <div className="text-sm font-medium">{m.from}</div>
+                  <div className="text-sm">{m.text}</div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    {timeAgo(m.time)}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-3 flex items-center gap-2">
+              <input
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Type a message…"
+                className="flex-1 p-2 border rounded"
+              />
+              <button
+                onClick={() => {
+                  if (!text.trim()) return;
+                  setMessages((s) => [
+                    ...s,
+                    { from: "Creator", text: text.trim(), time: Date.now() },
+                  ]);
+                  setText("");
+                }}
+                className="px-4 py-2 bg-indigo-600 text-white rounded"
+              >
+                Send
+              </button>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Notifications */}
+      <div className="bg-white rounded-lg shadow p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="font-semibold">Notifications</div>
+            <div className="text-xs text-gray-500">
+              System alerts and updates
+            </div>
+          </div>
+          <div>
+            <button
+              onClick={() => alert("Mark all read (demo)")}
+              className="px-3 py-1 border rounded text-sm"
+            >
+              Mark all read
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-3 max-h-64 overflow-auto space-y-2">
+          {notifications.map((n) => (
+            <button
+              key={n.id}
+              onClick={() => alert(`${n.text} — ${timeAgo(n.time)}`)}
+              className="w-full text-left p-3 rounded hover:bg-gray-50 flex items-center justify-between"
+            >
+              <div>
+                <div className="text-sm">{n.text}</div>
+                <div className="text-xs text-gray-400">{timeAgo(n.time)}</div>
+              </div>
+              <div className="text-xs text-gray-500">{n.type}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Broadcast (blank) */}
+      <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500">
+        No broadcasts available right now.
       </div>
     </div>
   );
 };
 
 /* ---------------------------
-   Main App
+   End of Part 1
+   Part 2 will continue with Campaigns, Payments, Modals, and full App wiring.
 ----------------------------*/
-export default function App() {
-  const [role, setRole] = useState<Role>("Creator");
+// App.tsx — COMBINED (PART 2 of 2)
+// Paste this right after Part 1 in the same file.
 
+const progressSteps = [
+  "Accepted",
+  "Content Sent",
+  "Approval",
+  "Content Posted Confirmation Sent",
+  "Post Approval",
+];
+
+const getStageIndex = (stage?: string) =>
+  progressSteps.findIndex((s) => s === stage);
+
+/* Payment Detail Modal */
+const PaymentDetailModal: React.FC<{
+  open: boolean;
+  onClose: () => void;
+  campaign?: Campaign;
+}> = ({ open, onClose, campaign }) => {
+  if (!open || !campaign) return null;
+  return (
+    <Modal open={open} onClose={onClose} title="Payment Details" size="md">
+      <div className="space-y-3 text-sm text-gray-700">
+        <div>
+          <b>Campaign:</b> {campaign.name}
+        </div>
+        <div>
+          <b>Campaign ID:</b> {campaign.id}
+        </div>
+        <div>
+          <b>Amount:</b> {campaign.amount || "₹ —"}
+        </div>
+        <div>
+          <b>Status:</b> {campaign.paymentStatus || "Under Process"}
+        </div>
+        <div>
+          <b>Transaction ID:</b> TXN-{campaign.id.slice(-4)}-XYZ
+        </div>
+        <div>
+          <b>Mode:</b> Bank Transfer
+        </div>
+        <div>
+          <b>Invoice Date:</b>{" "}
+          {new Date(Date.now() - 86400000 * 2).toLocaleDateString()}
+        </div>
+        <div>
+          <b>Expected Date:</b>{" "}
+          {new Date(Date.now() + 86400000 * 5).toLocaleDateString()}
+        </div>
+        <div className="pt-2 flex justify-end">
+          <button
+            onClick={() => alert("Ticket raised (demo)")}
+            className="px-3 py-1 bg-indigo-600 text-white rounded"
+          >
+            Raise Ticket
+          </button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+/* Campaigns & Contracts */
+const CampaignsContracts: React.FC<{
+  campaigns: Campaign[];
+  setCampaigns: (c: Campaign[]) => void;
+  openChat: (cid: string) => void;
+  openPayment: (c: Campaign) => void;
+}> = ({ campaigns, setCampaigns, openChat, openPayment }) => {
+  const [filter, setFilter] = useState("All");
+  const [briefOpen, setBriefOpen] = useState<Campaign | null>(null);
+  const [reasonModal, setReasonModal] = useState(false);
+  const [reasonText, setReasonText] = useState("");
+  const [updateModal, setUpdateModal] = useState(false);
+  const [updateMsg, setUpdateMsg] = useState("");
+
+  const ongoing = campaigns.filter(
+    (c) => c.stage && c.stage !== "Post Approval"
+  );
+  const available = campaigns.filter((c) => !c.stage && !c.declined);
+  const updateReq = campaigns.filter((c) => c.updateRequests?.length);
+  const completed = campaigns.filter(
+    (c) => c.stage === "Post Approval" || c.declined
+  );
+
+  const handleAccept = (c: Campaign) => {
+    setCampaigns(
+      campaigns.map((x) =>
+        x.id === c.id ? { ...x, stage: "Accepted", isNew: false } : x
+      )
+    );
+    setBriefOpen(null);
+  };
+
+  const handleDecline = (c: Campaign) => {
+    setReasonModal(true);
+    setReasonText("");
+    setBriefOpen(c);
+  };
+
+  const confirmDecline = () => {
+    if (!briefOpen) return;
+    setCampaigns(
+      campaigns.map((x) =>
+        x.id === briefOpen.id
+          ? {
+              ...x,
+              declined: { reason: reasonText, by: "creator", time: Date.now() },
+              isNew: false,
+            }
+          : x
+      )
+    );
+    setReasonModal(false);
+    setBriefOpen(null);
+  };
+
+  const handleUpdate = (c: Campaign) => {
+    setUpdateModal(true);
+    setUpdateMsg("");
+    setBriefOpen(c);
+  };
+
+  const sendUpdate = () => {
+    if (!briefOpen) return;
+    const req = {
+      id: `UR-${Math.floor(Math.random() * 999)}`,
+      from: "creator",
+      message: updateMsg,
+      time: Date.now(),
+    };
+    setCampaigns(
+      campaigns.map((x) =>
+        x.id === briefOpen.id
+          ? {
+              ...x,
+              updateRequests: [...(x.updateRequests || []), req],
+              isNew: false,
+            }
+          : x
+      )
+    );
+    setUpdateModal(false);
+    setBriefOpen(null);
+  };
+
+  const CardStrip = ({
+    title,
+    data,
+    filterable,
+  }: {
+    title: string;
+    data: Campaign[];
+    filterable?: boolean;
+  }) => {
+    const [search, setSearch] = useState("");
+    const visible = useMemo(
+      () =>
+        data
+          .filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
+          .filter((c) =>
+            filterable ? withinRange(c.createdAt, filter) : true
+          ),
+      [data, search, filter, filterable]
+    );
+
+    return (
+      <div className="bg-white rounded-lg shadow p-4 mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-semibold">{title}</h3>
+          <div className="flex items-center gap-2">
+            {filterable && (
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className="border rounded px-2 py-1 text-sm"
+              >
+                {["Today", "This Week", "This Month", "This Year", "All"].map(
+                  (f) => (
+                    <option key={f}>{f}</option>
+                  )
+                )}
+              </select>
+            )}
+            <input
+              placeholder="Search…"
+              className="border rounded px-2 py-1 text-sm"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-4 overflow-x-auto pb-2">
+          {visible.map((c) => (
+            <div
+              key={c.id}
+              className={`bg-gradient-to-br from-blue-50 to-indigo-50 border border-indigo-100 rounded-xl shadow ${cardMinWidth} ${cardHeight} p-4 flex flex-col justify-between`}
+            >
+              <div>
+                <div className="font-semibold text-indigo-800">{c.name}</div>
+                <div className="text-xs text-gray-500">{c.id}</div>
+                <div className="text-xs text-gray-500 mt-1">POC: {c.poc}</div>
+                {c.isNew && (
+                  <div className="mt-1 inline-block bg-green-500 text-white text-xs px-2 rounded">
+                    NEW
+                  </div>
+                )}
+                {c.stage && title === "Ongoing Campaigns" && (
+                  <div className="mt-2">
+                    <div className="text-xs text-gray-500 mb-1">Progress</div>
+                    <div className="flex items-center gap-1">
+                      {progressSteps.map((s, i) => (
+                        <div
+                          key={s}
+                          className={`flex-1 h-1 rounded ${
+                            i <= getStageIndex(c.stage)
+                              ? "bg-indigo-600"
+                              : "bg-gray-200"
+                          }`}
+                        ></div>
+                      ))}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1 text-right">
+                      {c.stage}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-3 flex justify-between items-center">
+                <button
+                  onClick={() => setBriefOpen(c)}
+                  className="text-sm px-3 py-1 bg-indigo-600 text-white rounded"
+                >
+                  Open Brief
+                </button>
+
+                {title === "Ongoing Campaigns" && (
+                  <button
+                    onClick={() => openChat(c.id)}
+                    className="text-sm px-3 py-1 border rounded"
+                  >
+                    Open Chat
+                  </button>
+                )}
+
+                {title === "Completed & Declined" && (
+                  <button
+                    onClick={() => openPayment(c)}
+                    className="text-sm px-3 py-1 border rounded"
+                  >
+                    Payment Status
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold">Campaigns & Contracts</h2>
+      <CardStrip title="Ongoing Campaigns" data={ongoing} />
+      <CardStrip
+        title="Available & New Opportunities"
+        data={available}
+        filterable
+      />
+      <CardStrip title="Update Requests" data={updateReq} />
+      <CardStrip title="Completed & Declined" data={completed} />
+
+      {/* Brief Modal */}
+      <Modal
+        open={!!briefOpen}
+        onClose={() => setBriefOpen(null)}
+        title="Campaign Brief"
+        size="lg"
+      >
+        {briefOpen && (
+          <div className="whitespace-pre-wrap text-gray-700 space-y-3 text-sm">
+            <p>
+              Dear Creator,
+              <br />
+              <br />
+              We’re thrilled to invite you to collaborate on{" "}
+              <b>{briefOpen.name}</b>. Below are the key details.
+            </p>
+            <p>
+              <b>Deliverables:</b> {briefOpen.deliverables}
+              <br />
+              <b>Offer Amount:</b> {briefOpen.amount}
+              <br />
+              <b>Offering:</b> {briefOpen.offering}
+            </p>
+            <p>{briefOpen.brief}</p>
+            <p>
+              Regards,
+              <br />
+              Microsoft Campaign Team
+            </p>
+
+            {!briefOpen.stage && !briefOpen.declined && (
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  onClick={() => handleAccept(briefOpen)}
+                  className="px-3 py-1 bg-green-600 text-white rounded"
+                >
+                  Accept
+                </button>
+                <button
+                  onClick={() => handleDecline(briefOpen)}
+                  className="px-3 py-1 bg-red-500 text-white rounded"
+                >
+                  Decline
+                </button>
+                <button
+                  onClick={() => handleUpdate(briefOpen)}
+                  className="px-3 py-1 bg-amber-500 text-white rounded"
+                >
+                  Update Request
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
+
+      {/* Decline Modal */}
+      <Modal
+        open={reasonModal}
+        onClose={() => setReasonModal(false)}
+        title="Decline Reason"
+        size="sm"
+      >
+        <textarea
+          rows={4}
+          className="w-full border rounded p-2"
+          placeholder="Enter reason..."
+          value={reasonText}
+          onChange={(e) => setReasonText(e.target.value)}
+        />
+        <div className="mt-3 flex justify-end">
+          <button
+            onClick={confirmDecline}
+            className="px-3 py-1 bg-red-500 text-white rounded"
+          >
+            Submit
+          </button>
+        </div>
+      </Modal>
+
+      {/* Update Modal */}
+      <Modal
+        open={updateModal}
+        onClose={() => setUpdateModal(false)}
+        title="Update Request"
+        size="sm"
+      >
+        {briefOpen && (
+          <div className="text-sm">
+            <div className="mb-2">
+              <b>To:</b> {briefOpen.poc}
+            </div>
+            <textarea
+              rows={4}
+              className="w-full border rounded p-2"
+              placeholder="Write your message…"
+              value={updateMsg}
+              onChange={(e) => setUpdateMsg(e.target.value)}
+            />
+            <div className="mt-3 flex justify-end">
+              <button
+                onClick={sendUpdate}
+                className="px-3 py-1 bg-indigo-600 text-white rounded"
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
+};
+
+/* Main App */
+const App: React.FC = () => {
+  const [role, setRole] = useState<Role>("Creator");
   const modules = [
     "Creator Directory",
     "Communication",
@@ -1123,879 +1339,129 @@ export default function App() {
     "Performance",
   ];
   const subitems: Record<string, string[]> = {
-    "Creator Directory": ["View / Update Profile"], // no social links subitem
-    Communication: ["Campaign Chat", "Notifications", "Broadcast"],
-    "Campaigns & Contracts": ["All Campaigns & Contracts"],
-    Payments: ["All Payments & Tickets"],
-    Performance: ["Post Engagement", "Contracts", "Payments"],
+    "Creator Directory": ["Profile"],
+    Communication: ["Chat & Notifications"],
+    "Campaigns & Contracts": ["Overview"],
+    Payments: ["Payment Info", "Status & Tickets"],
+    Performance: ["Overview"],
   };
-
-  const [selectedModule, setSelectedModule] = useState<string>(
-    "Campaigns & Contracts"
-  );
-  const [selectedSub, setSelectedSub] = useState<string>(
-    "All Campaigns & Contracts"
-  );
-
-  // data
-  const [campaigns, setCampaigns] = useState<Campaign[]>(() =>
-    makeMockCampaigns()
-  );
-  const [tickets, setTickets] = useState<Ticket[]>(seedTickets);
-  const [paymentInfo, setPaymentInfo] = useState({
-    account: "XXXXXXXXXXXX1234",
-    ifsc: "HDFC0001234",
-    taxDocument: "PAN.pdf",
-  });
+  const [selected, setSelected] = useState("Creator Directory");
+  const [selectedSub, setSelectedSub] = useState("Profile");
+  const [campaigns, setCampaigns] = useState(makeMockCampaigns());
+  const [notifications] = useState<NotificationItem[]>(makeNotifications());
   const [profile, setProfile] = useState({
-    name: "Rohit Sharma",
-    phone: "+91 98765 43210",
-    email: "rohit@example.com",
-    creatorType: "Lifestyle / Tech",
-    bio: "Creator focused on tech reviews.",
+    name: "Rohan Sharma",
+    email: "rohan@example.com",
+    phone: "9876543210",
+    creatorType: "Tech Reviewer",
+    bio: "Creating content that bridges tech and lifestyle.",
   });
-  const [socials, setSocials] = useState(socialsExample);
-
-  // Brief modal states
-  const [briefOpen, setBriefOpen] = useState(false);
-  const [briefCampaign, setBriefCampaign] = useState<Campaign | null>(null);
-
-  // progress popup for messages
-  const [progressPopup, setProgressPopup] = useState<{
-    open: boolean;
-    campaign: Campaign | null;
-  }>({ open: false, campaign: null });
-
-  // filters & search (only Available needs date filter per your last note; others get search only)
-  const [searchAvailable, setSearchAvailable] = useState("");
-  const [filterAvailable, setFilterAvailable] = useState("All");
-
-  const [searchOngoing, setSearchOngoing] = useState("");
-  const [searchCompleted, setSearchCompleted] = useState("");
-  const [searchUpdate, setSearchUpdate] = useState("");
-
-  // Payments search & filter
-  const [searchPayments, setSearchPayments] = useState("");
-  const [filterPaymentStatus, setFilterPaymentStatus] = useState("All");
-
-  /* Categorize campaigns */
-  const availableList = useMemo(
-    () => campaigns.filter((c) => !c.stage && !c.isBroadcast && !c.declined),
-    [campaigns]
-  );
-  const ongoingList = useMemo(
-    () => campaigns.filter((c) => c.stage && c.stage !== "Post Approval"),
-    [campaigns]
-  );
-  const completedList = useMemo(
-    () => campaigns.filter((c) => c.stage === "Post Approval" || c.declined),
-    [campaigns]
-  );
-  const updateRequestsList = useMemo(
-    () =>
-      campaigns.filter((c) => c.updateRequests && c.updateRequests.length > 0),
-    [campaigns]
+  const [socials, setSocials] = useState(socialsDefault);
+  const [paymentModal, setPaymentModal] = useState(false);
+  const [paymentCampaign, setPaymentCampaign] = useState<Campaign | undefined>(
+    undefined
   );
 
-  /* Utilities */
-  const openBriefModal = (c: Campaign) => {
-    setBriefCampaign(c);
-    setBriefOpen(true);
-  };
-  const closeBriefModal = () => {
-    setBriefCampaign(null);
-    setBriefOpen(false);
+  const openPayment = (c: Campaign) => {
+    setPaymentCampaign(c);
+    setPaymentModal(true);
+    setSelected("Payments");
   };
 
-  const acceptInvite = (id: string) => {
-    setCampaigns((cs) =>
-      cs.map((c) =>
-        c.id === id ? { ...c, stage: "Accepted", isNew: false } : c
-      )
-    );
-    closeBriefModal();
+  const openChat = (cid: string) => {
+    setSelected("Communication");
+    console.log("Open chat for", cid);
   };
 
-  const declineInvite = (id: string) => {
-    const reason = prompt("Please enter reason for declining (this is a demo)");
-    if (reason === null) return;
-    setCampaigns((cs) =>
-      cs.map((c) =>
-        c.id === id
-          ? { ...c, declined: { reason, by: "Creator", time: Date.now() } }
-          : c
-      )
-    );
-    closeBriefModal();
-  };
-
-  const updateRequestFromBrief = (id: string, message: string) => {
-    setCampaigns((cs) =>
-      cs.map((c) =>
-        c.id === id
-          ? {
-              ...c,
-              updateRequests: [
-                ...(c.updateRequests ?? []),
-                {
-                  id: `UR-${Math.floor(Math.random() * 9000)}`,
-                  from: "creator",
-                  message,
-                  time: Date.now(),
-                },
-              ],
-            }
-          : c
-      )
-    );
-    closeBriefModal();
-  };
-
-  const advanceStage = (id: string, next: CampaignStage) => {
-    setCampaigns((cs) =>
-      cs.map((c) => {
-        if (c.id !== id) return c;
-        const updated: Campaign = { ...c, stage: next };
-        // when Post Approval is reached, mark payment status and it will appear in Completed list due to stage
-        if (next === "Post Approval") {
-          updated.paymentStatus = "Under Process";
-        }
-        return updated;
-      })
-    );
-  };
-
-  // Payments: raise ticket
-  const raiseTicket = (campaignId?: string) => {
-    const ticketId = `T-${Math.floor(Math.random() * 900 + 100)}`;
-    const newTicket: Ticket = {
-      id: ticketId,
-      campaignId,
-      subject: campaignId ? `Payment issue: ${campaignId}` : "General",
-      status: "Initiated",
-      messages: [
-        {
-          from: "Creator",
-          text: `Raised ticket for ${campaignId ?? "general"}`,
-          time: Date.now(),
-        },
-      ],
-      createdAt: Date.now(),
-    };
-    setTickets((t) => [newTicket, ...t]);
-    alert(`Ticket ${ticketId} created`);
-  };
-
-  const addMessageToTicket = (ticketId: string, text: string) => {
-    setTickets((ts) =>
-      ts.map((t) =>
-        t.id === ticketId
-          ? {
-              ...t,
-              messages: [
-                ...t.messages,
-                { from: "Creator", text, time: Date.now() },
-              ],
-              status: "Under Process",
-            }
-          : t
-      )
-    );
-  };
-
-  const savePaymentInfo = (p: any) => {
-    setPaymentInfo(p);
-    alert("Payment info saved (local)");
-  };
-
-  const sendMessageToPOC = (campaignId: string, message: string) => {
-    // add update request and move to update requests list (already reflected by presence in updateRequestsList)
-    setCampaigns((cs) =>
-      cs.map((c) =>
-        c.id === campaignId
-          ? {
-              ...c,
-              updateRequests: [
-                ...(c.updateRequests ?? []),
-                {
-                  id: `UR-${Math.floor(Math.random() * 9000)}`,
-                  from: "creator",
-                  message,
-                  time: Date.now(),
-                },
-              ],
-            }
-          : c
-      )
-    );
-    alert("Update request sent; campaign moved to Update Requests.");
-  };
-
-  // Filter helpers
-  const filterStrip = (
-    list: Campaign[],
-    search: string,
-    dateFilter?: string
-  ) => {
-    return list.filter((c) => {
-      const match =
-        c.name.toLowerCase().includes(search.toLowerCase()) ||
-        c.id.toLowerCase().includes(search.toLowerCase());
-      const dateMatch = dateFilter
-        ? withinRange(c.createdAt, dateFilter)
-        : true;
-      return match && dateMatch;
-    });
-  };
-
-  const paymentsList = useMemo(
-    () => campaigns.filter((c) => c.paymentStatus),
-    [campaigns]
-  );
-  const filteredPayments = useMemo(
-    () =>
-      paymentsList.filter((c) => {
-        const searchMatch =
-          c.name.toLowerCase().includes(searchPayments.toLowerCase()) ||
-          c.id.toLowerCase().includes(searchPayments.toLowerCase());
-        const statusMatch =
-          filterPaymentStatus === "All"
-            ? true
-            : c.paymentStatus === filterPaymentStatus;
-        return searchMatch && statusMatch;
-      }),
-    [paymentsList, searchPayments, filterPaymentStatus]
-  );
-
-  /* Brief Modal content component */
-  const BriefModalContent: React.FC<{ campaign: Campaign | null }> = ({
-    campaign,
-  }) => {
-    const [msg, setMsg] = useState("");
-    if (!campaign) return null;
-
-    // determine if this campaign is currently displayed in Available (invite)
-    const isAvailable = !campaign.stage && !campaign.declined;
-
-    // letter style content
-    const letter = (
-      <div className="prose max-w-none">
-        <p>Dear Creator,</p>
-        <p>
-          We are excited to invite you to collaborate on{" "}
-          <strong>{campaign.name}</strong>.
-        </p>
-        <p>
-          <strong>Deliverables:</strong>{" "}
-          {campaign.deliverables ?? campaign.brief}
-        </p>
-        <p>
-          <strong>Offer Amount:</strong> {campaign.amount ?? "To be discussed"}
-        </p>
-        <p>
-          <strong>Offering:</strong> {campaign.offering ?? "Product + fee"}
-        </p>
-        <p>
-          Please follow the brand guidelines and submit the content by the
-          deadline. We look forward to your creativity.
-        </p>
-        <p>
-          Regards,
-          <br />
-          Microsoft Campaign Team
-        </p>
-      </div>
-    );
-
-    return (
-      <div>
-        <div className="bg-gray-50 rounded p-4 mb-4">{letter}</div>
-
-        {isAvailable ? (
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => acceptInvite(campaign.id)}
-              className="px-4 py-2 bg-green-600 text-white rounded"
-            >
-              Accept
-            </button>
-            <button
-              onClick={() => declineInvite(campaign.id)}
-              className="px-4 py-2 bg-red-100 text-red-700 rounded"
-            >
-              Decline
-            </button>
-
-            <div className="ml-auto w-full md:w-auto flex items-center gap-2">
-              <input
-                value={msg}
-                onChange={(e) => setMsg(e.target.value)}
-                placeholder={`Message to ${campaign.poc}`}
-                className="p-2 border rounded flex-1"
-              />
-              <button
-                onClick={() => {
-                  if (!msg.trim()) {
-                    alert("Enter message");
-                    return;
-                  }
-                  updateRequestFromBrief(campaign.id, msg.trim());
-                  setMsg("");
-                }}
-                className="px-3 py-2 bg-yellow-500 rounded text-white"
-              >
-                Update Request
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="text-sm text-gray-600">
-            This is a read-only brief (actions are available only for Available
-            invites).
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  /* view progress popup content */
-  const ProgressPopupContent: React.FC<{ campaign: Campaign | null }> = ({
-    campaign,
-  }) => {
-    if (!campaign) return null;
-    return (
-      <div>
-        <div className="text-sm">
-          Current Stage: <strong>{campaign.stage ?? "Invite"}</strong>
-        </div>
-        <div className="h-64 overflow-auto border rounded p-3 mt-3 space-y-2">
-          {(campaign.updateRequests ?? []).map((u) => (
-            <div key={u.id} className="p-2 bg-indigo-50 rounded">
-              <div className="text-sm font-medium">You</div>
-              <div className="text-sm">{u.message}</div>
-              <div className="text-xs text-gray-400 mt-1">
-                {timeAgo(u.time)}
-              </div>
-            </div>
-          ))}
-          <div className="p-2 bg-gray-100 rounded">
-            <div className="text-sm font-medium">Microsoft User</div>
-            <div className="text-sm">
-              Simulated response message from POC (demo)
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-3">
-          <label className="text-xs text-gray-500">Send message to POC</label>
-          <SendToPOCForm
-            campaign={campaign}
-            onSend={(msg) => {
-              sendMessageToPOC(campaign.id, msg);
-              setProgressPopup({ open: false, campaign: null });
-            }}
-          />
-        </div>
-      </div>
-    );
-  };
-
-  const SendToPOCForm: React.FC<{
-    campaign: Campaign;
-    onSend: (msg: string) => void;
-  }> = ({ campaign, onSend }) => {
-    const [msg, setMsg] = useState("");
-    return (
-      <div className="flex items-center gap-2 mt-2">
-        <div className="text-xs text-gray-500">
-          To: <b>{campaign.poc}</b>
-        </div>
-        <input
-          value={msg}
-          onChange={(e) => setMsg(e.target.value)}
-          placeholder="Write message..."
-          className="p-2 border rounded flex-1"
-        />
-        <button
-          onClick={() => {
-            if (!msg.trim()) {
-              alert("Enter message");
-              return;
-            }
-            onSend(msg.trim());
-            setMsg("");
-          }}
-          className="px-3 py-2 bg-indigo-600 text-white rounded"
-        >
-          Send
-        </button>
-      </div>
-    );
-  };
-
-  /* Creator Directory handlers */
-  const saveProfileSection = (section: string, data: any) => {
-    setProfile((p) => ({ ...p, ...data }));
-    alert("Profile saved (local)");
-  };
-  const updateSocials = (s: any) => {
-    setSocials(s);
-    alert("Socials saved (local)");
-  };
-
-  /* Effect: if any campaign reaches Post Approval, it will appear in completed (because stage set) */
-  useEffect(() => {
-    // no-op; stage changes are handled by advanceStage
-  }, [campaigns]);
-
-  /* ---------------------------
-     Render modules
-  ----------------------------*/
-
-  const renderCampaignsModule = () => {
-    // Prepare filtered arrays
-    const availableFiltered = filterStrip(
-      availableList,
-      searchAvailable,
-      filterAvailable
-    );
-    const ongoingFiltered = filterStrip(ongoingList, searchOngoing);
-    const completedFiltered = filterStrip(completedList, searchCompleted);
-    const updateFiltered = filterStrip(updateRequestsList, searchUpdate);
-
-    return (
-      <div className="space-y-6">
-        <h2 className="text-lg font-semibold">Campaigns & Contracts</h2>
-
-        {/* Available */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="font-semibold">Available & New Opportunities</div>
-              <div className="text-xs text-gray-500">Invite-only campaigns</div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <input
-                value={searchAvailable}
-                onChange={(e) => setSearchAvailable(e.target.value)}
-                placeholder="Search by name or id"
-                className="p-2 border rounded"
-              />
-              <select
-                value={filterAvailable}
-                onChange={(e) => setFilterAvailable(e.target.value)}
-                className="p-2 border rounded"
-              >
-                <option>All</option>
-                <option>Today</option>
-                <option>This Week</option>
-                <option>This Month</option>
-                <option>This Year</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-400">
-            {availableFiltered.length === 0 && (
-              <div className="text-gray-500 p-4">
-                No invites match your search / filter.
-              </div>
-            )}
-            {availableFiltered.map((c) => (
-              <div key={c.id} className="inline-block mr-3">
-                <CampaignCard c={c} onOpenBrief={openBriefModal} />
-              </div>
-            ))}
-            {/* ensure at least 10 cards */}
-            {Array.from({
-              length: Math.max(0, 10 - availableFiltered.length),
-            }).map((_, i) => (
-              <div key={"avail-pad-" + i} className="inline-block mr-3">
-                <div
-                  className={`${cardMinWidth} ${cardHeight} bg-white/60 rounded-2xl p-4 border-dashed border-2 border-gray-200 text-gray-400 flex items-center justify-center`}
-                >
-                  Placeholder
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Ongoing */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="font-semibold">Ongoing Campaigns</div>
-              <div className="text-xs text-gray-500">
-                Track progress of active campaigns
-              </div>
-            </div>
-            <div>
-              <input
-                value={searchOngoing}
-                onChange={(e) => setSearchOngoing(e.target.value)}
-                placeholder="Search by name or id"
-                className="p-2 border rounded"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-400">
-            {ongoingFiltered.length === 0 && (
-              <div className="text-gray-500 p-4">
-                No ongoing campaigns match your filters.
-              </div>
-            )}
-            {ongoingFiltered.map((c) => (
-              <div key={c.id} className="inline-block mr-3">
-                <div
-                  className={`${cardMinWidth} ${cardHeight} bg-white rounded-2xl p-4 shadow-lg border`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="font-semibold text-lg">{c.name}</div>
-                      <div className="text-xs text-gray-500">
-                        {c.id} • {c.poc}
-                      </div>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {timeAgo(c.createdAt)}
-                    </div>
-                  </div>
-
-                  <div className="mt-3">
-                    <ProgressTracker
-                      stage={c.stage}
-                      onAdvance={(next) => advanceStage(c.id, next)}
-                    />
-                  </div>
-
-                  <div className="mt-3 flex gap-2">
-                    <button
-                      onClick={() => openBriefModal(c)}
-                      className="px-3 py-1 bg-indigo-600 text-white rounded"
-                    >
-                      Open Brief
-                    </button>
-                    <button
-                      onClick={() =>
-                        setProgressPopup({ open: true, campaign: c })
-                      }
-                      className="px-3 py-1 border rounded"
-                    >
-                      View Progress Messages
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {Array.from({
-              length: Math.max(0, 10 - ongoingFiltered.length),
-            }).map((_, i) => (
-              <div key={"ongo-pad-" + i} className="inline-block mr-3">
-                <div
-                  className={`${cardMinWidth} ${cardHeight} bg-white/60 rounded-2xl p-4 border-dashed border-2 border-gray-200 text-gray-400 flex items-center justify-center`}
-                >
-                  Placeholder
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Update Requests */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="font-semibold">Update Requests</div>
-              <div className="text-xs text-gray-500">
-                Campaigns where you requested updates
-              </div>
-            </div>
-            <div>
-              <input
-                value={searchUpdate}
-                onChange={(e) => setSearchUpdate(e.target.value)}
-                placeholder="Search by name or id"
-                className="p-2 border rounded"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-400">
-            {updateFiltered.length === 0 && (
-              <div className="text-gray-500 p-4">No update requests yet.</div>
-            )}
-            {updateFiltered.map((c) => (
-              <div key={c.id} className="inline-block mr-3">
-                <div
-                  className={`${cardMinWidth} ${cardHeight} bg-white rounded-2xl p-4 shadow-lg border`}
-                >
-                  <div className="font-semibold">{c.name}</div>
-                  <div className="text-xs text-gray-500">
-                    {c.id} • {c.poc}
-                  </div>
-                  <div className="mt-2 text-sm text-gray-600">
-                    {(c.updateRequests ?? []).map((u) => u.message).join(" • ")}
-                  </div>
-                  <div className="mt-3 flex gap-2">
-                    <button
-                      onClick={() => openBriefModal(c)}
-                      className="px-3 py-1 bg-indigo-600 text-white rounded"
-                    >
-                      Open Brief
-                    </button>
-                    <button
-                      onClick={() => alert("Open conversation (demo)")}
-                      className="px-3 py-1 border rounded"
-                    >
-                      View Messages
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {Array.from({
-              length: Math.max(0, 10 - updateFiltered.length),
-            }).map((_, i) => (
-              <div key={"upd-pad-" + i} className="inline-block mr-3">
-                <div
-                  className={`${cardMinWidth} ${cardHeight} bg-white/60 rounded-2xl p-4 border-dashed border-2 border-gray-200 text-gray-400 flex items-center justify-center`}
-                >
-                  Placeholder
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Completed */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="font-semibold">Completed & Declined</div>
-              <div className="text-xs text-gray-500">
-                Completed posts and declined invites
-              </div>
-            </div>
-            <div>
-              <input
-                value={searchCompleted}
-                onChange={(e) => setSearchCompleted(e.target.value)}
-                placeholder="Search by name or id"
-                className="p-2 border rounded"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-400">
-            {completedFiltered.length === 0 && (
-              <div className="text-gray-500 p-4">
-                No completed items match your filters.
-              </div>
-            )}
-            {completedFiltered.map((c) => (
-              <div key={c.id} className="inline-block mr-3">
-                <CampaignCard
-                  c={c}
-                  onOpenBrief={openBriefModal}
-                  onViewProgress={() => alert(`View final status for ${c.id}`)}
-                />
-              </div>
-            ))}
-            {Array.from({
-              length: Math.max(0, 10 - completedFiltered.length),
-            }).map((_, i) => (
-              <div key={"comp-pad-" + i} className="inline-block mr-3">
-                <div
-                  className={`${cardMinWidth} ${cardHeight} bg-white/60 rounded-2xl p-4 border-dashed border-2 border-gray-200 text-gray-400 flex items-center justify-center`}
-                >
-                  Placeholder
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  /* Render Payments module */
-  const PaymentsModule = () => (
-    <div className="space-y-6">
-      <h2 className="text-lg font-semibold">Payments</h2>
-
-      <PaymentInfoForm payment={paymentInfo} onSave={savePaymentInfo} />
-
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <div className="font-semibold">Payment Status</div>
-            <div className="text-xs text-gray-500">
-              Track payment progress for campaigns
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              value={searchPayments}
-              onChange={(e) => setSearchPayments(e.target.value)}
-              placeholder="Search by name or id"
-              className="p-2 border rounded"
-            />
-            <select
-              value={filterPaymentStatus}
-              onChange={(e) => setFilterPaymentStatus(e.target.value)}
-              className="p-2 border rounded"
-            >
-              <option>All</option>
-              <option>Under Process</option>
-              <option>Awaiting Approval</option>
-              <option>Paid</option>
-              <option>Initiated</option>
-              <option>Completed</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-400">
-          {filteredPayments.length === 0 && (
-            <div className="text-gray-500 p-4">
-              No payments match your search / filter.
-            </div>
-          )}
-          {filteredPayments.map((c) => (
-            <div key={c.id} className="inline-block mr-3">
-              <PaymentCard c={c} onRaiseTicket={(id) => raiseTicket(id)} />
-            </div>
-          ))}
-          {Array.from({
-            length: Math.max(0, 10 - filteredPayments.length),
-          }).map((_, i) => (
-            <div key={"pay-pad-" + i} className="inline-block mr-3">
-              <div
-                className={`${cardMinWidth} ${cardHeight} bg-white/60 rounded-2xl p-4 border-dashed border-2 border-gray-200 text-gray-400 flex items-center justify-center`}
-              >
-                Placeholder
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <h4 className="font-semibold mb-3">Tickets</h4>
-        <TicketsView tickets={tickets} onAddMessage={addMessageToTicket} />
-      </div>
-    </div>
-  );
-
-  /* Creator Directory module render */
-  const CreatorDirectoryModule = () => (
-    <CreatorDirectory
-      profile={profile}
-      onSaveProfile={saveProfileSection}
-      socials={socials}
-      onUpdateSocials={updateSocials}
-    />
-  );
-
-  /* Performance module (placeholder) */
-  const PerformanceModule = () => (
-    <div>
-      <h2 className="text-lg font-semibold">Performance</h2>
-      <div className="bg-white rounded-lg shadow p-4 mt-3">
-        Performance metrics placeholder (will link from posted campaigns).
-      </div>
-    </div>
-  );
-
-  /* Selected module render switch */
-  const renderSelected = () => {
-    switch (selectedModule) {
+  const renderModule = () => {
+    switch (selected) {
       case "Creator Directory":
-        return <CreatorDirectoryModule />;
+        return (
+          <CreatorDirectory
+            profile={profile}
+            onSaveProfile={(s, d) => setProfile(d)}
+            socials={socials}
+            onUpdateSocials={(d) => setSocials(d)}
+          />
+        );
       case "Communication":
         return (
           <CommunicationsModule
             campaigns={campaigns}
-            openBrief={openBriefModal}
+            onOpenCampaignChat={openChat}
+            notifications={notifications}
           />
         );
       case "Campaigns & Contracts":
-        return renderCampaignsModule();
+        return (
+          <CampaignsContracts
+            campaigns={campaigns}
+            setCampaigns={setCampaigns}
+            openChat={openChat}
+            openPayment={openPayment}
+          />
+        );
       case "Payments":
-        return <PaymentsModule />;
-      case "Performance":
-        return <PerformanceModule />;
+        return (
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold">Payments</h2>
+            <div className="bg-white rounded-lg shadow p-4">
+              <div className="font-semibold mb-2">
+                Payment Info & Tax Documentation
+              </div>
+              <p className="text-sm text-gray-700">
+                Bank: HDFC Bank | Account No: XXXX-XXXX-1234 | IFSC: HDFC000123
+              </p>
+              <button
+                onClick={() => alert("Edit info (demo)")}
+                className="mt-3 px-3 py-1 border rounded text-sm"
+              >
+                Edit Info
+              </button>
+            </div>
+            <div className="bg-white rounded-lg shadow p-4">
+              <div className="font-semibold mb-2">Payment Status</div>
+              <p className="text-sm text-gray-700">
+                View campaign-wise payment progress and raise tickets.
+              </p>
+            </div>
+          </div>
+        );
       default:
-        return <div>Not implemented</div>;
+        return (
+          <div className="bg-white rounded-lg shadow p-6 text-gray-600">
+            Placeholder for {selected}
+          </div>
+        );
     }
   };
 
-  /* Brief modal & progress popup components usage */
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-indigo-100 to-blue-100">
       <Header role={role} />
-
       <div className="flex flex-1">
         <Sidebar
           modules={modules}
-          selected={selectedModule}
+          selected={selected}
           onSelect={(m) => {
-            setSelectedModule(m);
+            setSelected(m);
             setSelectedSub(subitems[m][0]);
           }}
           subitems={subitems}
           selectedSub={selectedSub}
-          onSelectSub={(s) => setSelectedSub(s)}
+          onSelectSub={setSelectedSub}
           role={role}
           setRole={setRole}
         />
-
-        <main className="flex-1 p-6 bg-gray-50 overflow-auto">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h1 className="text-2xl font-bold text-gray-800">
-                {selectedModule} —{" "}
-                <span className="text-indigo-600">{selectedSub}</span>
-              </h1>
-              <div className="text-sm text-gray-600">Creator Dashboard</div>
-            </div>
-
-            <div>{renderSelected()}</div>
-
-            <div className="mt-8 text-xs text-gray-400">
-              This is a mock UI. All actions update local state only.
-            </div>
-          </div>
-        </main>
+        <main className="flex-1 overflow-y-auto p-6">{renderModule()}</main>
       </div>
-
-      {/* Brief Modal */}
-      <Modal
-        open={briefOpen}
-        onClose={closeBriefModal}
-        title={briefCampaign ? `Brief — ${briefCampaign.name}` : "Brief"}
-        size="lg"
-      >
-        <BriefModalContent campaign={briefCampaign} />
-      </Modal>
-
-      {/* Progress Popup */}
-      <Modal
-        open={progressPopup.open}
-        onClose={() => setProgressPopup({ open: false, campaign: null })}
-        title={
-          progressPopup.campaign
-            ? `Progress — ${progressPopup.campaign.name}`
-            : "Progress"
-        }
-        size="md"
-      >
-        <ProgressPopupContent campaign={progressPopup.campaign} />
-      </Modal>
+      <PaymentDetailModal
+        open={paymentModal}
+        onClose={() => setPaymentModal(false)}
+        campaign={paymentCampaign}
+      />
     </div>
   );
-}
+};
+
+export default App;
