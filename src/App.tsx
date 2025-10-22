@@ -512,12 +512,18 @@ const ProgressTracker: React.FC<{
           <div key={s} className="flex items-center gap-3">
             <div
               className={`w-8 h-8 flex items-center justify-center rounded-full ${
-                i <= idx ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-500"
+                i <= idx
+                  ? "bg-indigo-600 text-white"
+                  : "bg-gray-100 text-gray-500"
               }`}
             >
               {i + 1}
             </div>
-            <div className={`${i <= idx ? "font-semibold text-gray-800" : "text-gray-400"}`}>
+            <div
+              className={`${
+                i <= idx ? "font-semibold text-gray-800" : "text-gray-400"
+              }`}
+            >
               {s}
             </div>
           </div>
@@ -525,9 +531,6 @@ const ProgressTracker: React.FC<{
       </div>
       <div className="mt-3">
         {/* Progress is display-only in creator view (no manual advance) */}
-        <div className="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm">
-          Current: {stage ?? "Invite"}
-        </div>
       </div>
     </div>
   );
@@ -537,7 +540,8 @@ const ProgressTracker: React.FC<{
 const PaymentCard: React.FC<{
   c: Campaign;
   onRaiseTicket: (campaignId?: string) => void;
-}> = ({ c, onRaiseTicket }) => (
+  onViewDetails?: (c: Campaign) => void;
+}> = ({ c, onRaiseTicket, onViewDetails }) => (
   <div
     className={`${cardMinWidth} ${cardHeight} bg-white rounded-2xl p-4 shadow-lg border hover:shadow-2xl transition flex flex-col justify-between`}
   >
@@ -558,8 +562,12 @@ const PaymentCard: React.FC<{
         Raise Ticket
       </button>
       <button
-        onClick={() => alert(`View payment details for ${c.id}`)}
-        className="px-3 py-1 border rounded"
+        onClick={() =>
+          onViewDetails
+            ? onViewDetails(c)
+            : alert(`View payment details for ${c.id}`)
+        }
+        $1className="px-3 py-1 border rounded"
       >
         View Details
       </button>
@@ -1053,7 +1061,12 @@ const socialsExample = {
 };
 
 /* Communications module (unchanged) */
-const CommunicationsModule: React.FC<{ campaigns: Campaign[]; openBrief: (c: Campaign) => void; activeChatCampaignId?: string | null }> = ({ campaigns, openBrief, activeChatCampaignId }) => {
+const CommunicationsModule: React.FC<{
+  campaigns: Campaign[];
+  openBrief: (c: Campaign) => void;
+  activeChatCampaignId?: string | null;
+  openChat?: (id: string) => void;
+}> = ({ campaigns, openBrief, activeChatCampaignId, openChat }) => {
   // Keep simple but consistent with earlier implementation; left unchanged in behavior
   return (
     <div className="space-y-4">
@@ -1085,17 +1098,125 @@ const CommunicationsModule: React.FC<{ campaigns: Campaign[]; openBrief: (c: Cam
             <div className="mt-3 p-4 bg-gray-50 rounded h-64 overflow-auto">
               {activeChatCampaignId ? (
                 (() => {
-                  const c = campaigns.find(x => x.id === activeChatCampaignId);
+                  const c = campaigns.find(
+                    (x) => x.id === activeChatCampaignId
+                  );
                   return c ? (
                     <div>
                       <div className="font-semibold">Chat — {c.name}</div>
-                      <div className="text-xs text-gray-500">Only enabled for accepted/ongoing campaigns.</div>
-                      <div className="mt-3 text-sm text-gray-600">This is a demo chat window for <b>{c.id}</b>. Messages would appear here.</div>
+                      <div className="text-xs text-gray-500">
+                        Only enabled for accepted/ongoing campaigns.
+                      </div>
+                      <div className="mt-3 text-sm text-gray-600">
+                        This is a demo chat window for <b>{c.id}</b>. Messages
+                        would appear here.
+                      </div>
                     </div>
-                  ) : <div className="text-sm text-gray-500">Selected campaign not found.</div>;
+                  ) : (
+                    <div className="text-sm text-gray-500">
+                      Selected campaign not found.
+                    </div>
+                  );
                 })()
               ) : (
-                <div className="text-sm text-gray-500">Select a campaign to view chat (demo unchanged).</div>
+                <div className="text-sm text-gray-500">
+                  {activeChatCampaignId ? (
+                    (() => {
+                      const c = campaigns.find(
+                        (x) => x.id === activeChatCampaignId
+                      );
+                      if (!c)
+                        return (
+                          <div className="text-sm text-gray-500">
+                            Selected campaign not found.
+                          </div>
+                        );
+                      return (
+                        <div className="flex flex-col h-full">
+                          {" "}
+                          <div className="flex items-center justify-between mb-2">
+                            {" "}
+                            <div>
+                              {" "}
+                              <div className="font-medium">{c.name}</div>{" "}
+                              <div className="text-xs text-gray-500">
+                                {c.id} • {c.poc}
+                              </div>{" "}
+                            </div>{" "}
+                          </div>{" "}
+                          <div className="flex-1 overflow-auto mb-3 space-y-2">
+                            {" "}
+                            {[
+                              {
+                                from: "POC",
+                                text: `Hi, please share draft for ${c.name}`,
+                                time: Date.now() - 1000 * 60 * 60 * 24,
+                              },
+                              {
+                                from: "Creator",
+                                text: "Sure — will share by EOD.",
+                                time: Date.now() - 1000 * 60 * 60 * 23,
+                              },
+                            ].map((m, i) => (
+                              <div
+                                key={i}
+                                className={`p-2 rounded ${
+                                  m.from === "Creator"
+                                    ? "bg-indigo-50 self-end"
+                                    : "bg-white"
+                                }`}
+                              >
+                                {" "}
+                                <div className="text-xs font-medium">
+                                  {m.from}
+                                </div>{" "}
+                                <div className="text-sm">{m.text}</div>{" "}
+                                <div className="text-xs text-gray-400 mt-1">
+                                  {timeAgo(m.time)}
+                                </div>{" "}
+                              </div>
+                            ))}{" "}
+                          </div>{" "}
+                          <div className="flex items-center gap-2">
+                            {" "}
+                            <button
+                              onClick={() => alert("Upload file (demo)")}
+                              className="px-3 py-2 border rounded text-lg"
+                              title="Upload content"
+                            >
+                              +
+                            </button>{" "}
+                            <input
+                              id="comm-input"
+                              placeholder="Write a message..."
+                              className="flex-1 p-2 border rounded"
+                            />{" "}
+                            <button
+                              onClick={() => {
+                                const el = document.getElementById(
+                                  "comm-input"
+                                ) as HTMLInputElement | null;
+                                if (!el || !el.value.trim())
+                                  return alert("Enter message");
+                                alert(
+                                  "Message sent (demo): " + el.value.trim()
+                                );
+                                el.value = "";
+                              }}
+                              className="px-4 py-2 bg-indigo-600 text-white rounded"
+                            >
+                              Send
+                            </button>{" "}
+                          </div>{" "}
+                        </div>
+                      );
+                    })()
+                  ) : (
+                    <div className="text-sm text-gray-500">
+                      Select an ongoing campaign to open chat.
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -1109,10 +1230,12 @@ const CommunicationsModule: React.FC<{ campaigns: Campaign[]; openBrief: (c: Cam
    Main App
 ----------------------------*/
 export default function App() {
-
   // --- Added state: active chat and payment modal campaign (injected by assistant)
-  const [activeChatCampaignId, setActiveChatCampaignId] = useState<string | null>(null);
-  const [paymentModalCampaign, setPaymentModalCampaign] = useState<Campaign | null>(null);
+  const [activeChatCampaignId, setActiveChatCampaignId] = useState<
+    string | null
+  >(null);
+  const [paymentModalCampaign, setPaymentModalCampaign] =
+    useState<Campaign | null>(null);
 
   // Open chat handler: navigate to Communication and set active chat campaign id
   const openChat = (campaignId: string) => {
@@ -1810,11 +1933,17 @@ export default function App() {
             )}
             {completedFiltered.map((c) => (
               <div key={c.id} className="inline-block mr-3">
-                <div className={`${cardMinWidth} ${cardHeight} bg-white rounded-2xl p-4 shadow-lg border`}>
+                <div
+                  className={`${cardMinWidth} ${cardHeight} bg-white rounded-2xl p-4 shadow-lg border`}
+                >
                   <div>
                     <div className="font-semibold text-lg">{c.name}</div>
-                    <div className="text-xs text-gray-500">{c.id} • {c.poc}</div>
-                    <div className="mt-2 text-sm text-gray-600 line-clamp-3">{c.brief}</div>
+                    <div className="text-xs text-gray-500">
+                      {c.id} • {c.poc}
+                    </div>
+                    <div className="mt-2 text-sm text-gray-600 line-clamp-3">
+                      {c.brief}
+                    </div>
                   </div>
                   <div className="mt-3 flex gap-2 justify-between items-center">
                     <button
@@ -1851,7 +1980,13 @@ export default function App() {
   };
 
   /* Render Payments module */
-  const PaymentsModule = ({ campaignToShow, clearCampaignToShow }: { campaignToShow?: Campaign | null; clearCampaignToShow?: () => void }) => (
+  const PaymentsModule = ({
+    campaignToShow,
+    clearCampaignToShow,
+  }: {
+    campaignToShow?: Campaign | null;
+    clearCampaignToShow?: () => void;
+  }) => (
     <div className="space-y-6">
       <h2 className="text-lg font-semibold">Payments</h2>
 
@@ -1896,7 +2031,13 @@ export default function App() {
           )}
           {filteredPayments.map((c) => (
             <div key={c.id} className="inline-block mr-3">
-              <PaymentCard c={c} onRaiseTicket={(id) => raiseTicket(id)} />
+              <PaymentCard
+                c={c}
+                onRaiseTicket={(id) => raiseTicket(id)}
+                onViewDetails={(cc) => {
+                  setPaymentModalCampaign(cc);
+                }}
+              />
             </div>
           ))}
           {Array.from({
@@ -1928,26 +2069,60 @@ export default function App() {
       >
         {campaignToShow && (
           <div className="space-y-3 text-sm text-gray-700">
-            <div><b>Campaign:</b> {campaignToShow.name}</div>
-            <div><b>ID:</b> {campaignToShow.id}</div>
-            <div><b>Amount:</b> {campaignToShow.amount ?? "₹ —"}</div>
-            <div><b>Status:</b> {campaignToShow.paymentStatus ?? "Under Process"}</div>
-            <div><b>Transaction ID:</b> TXN-{campaignToShow.id.slice(-4)}-XYZ</div>
-            <div><b>Mode:</b> Bank Transfer</div>
-            <div><b>Invoice Date:</b> {new Date(Date.now() - 86400000 * 2).toLocaleDateString()}</div>
-            <div><b>Expected Date:</b> {new Date(Date.now() + 86400000 * 5).toLocaleDateString()}</div>
-
-            <div className="pt-3 flex justify-end gap-3">
-              <button onClick={() => alert("Invoice download started (demo)")} className="px-3 py-1 bg-indigo-500 text-white rounded">Download Invoice</button>
-              <button onClick={() => { raiseTicket(campaignToShow.id); alert("Ticket raised (demo)") }} className="px-3 py-1 border rounded">Raise Ticket</button>
+            <div>
+              <b>Campaign:</b> {campaignToShow.name}
+            </div>
+            <div>
+              <b>ID:</b> {campaignToShow.id}
+            </div>
+            <div>
+              <b>Amount:</b> {campaignToShow.amount ?? "₹ —"}
+            </div>
+            <div>
+              <b>Status:</b> {campaignToShow.paymentStatus ?? "Under Process"}
+            </div>
+            <div>
+              <b>Transaction ID:</b> TXN-{campaignToShow.id.slice(-4)}-XYZ
+            </div>
+            <div>
+              <b>Mode:</b> Bank Transfer
+            </div>
+            <div>
+              <b>Invoice Date:</b>{" "}
+              {new Date(Date.now() - 86400000 * 2).toLocaleDateString()}
+            </div>
+            <div>
+              <b>Expected Date:</b>{" "}
+              {new Date(Date.now() + 86400000 * 5).toLocaleDateString()}
             </div>
 
-            <div className="pt-3 text-center text-gray-500 italic">Thank you for your collaboration. Payment is being processed as per schedule.</div>
+            <div className="pt-3 flex justify-end gap-3">
+              <button
+                onClick={() => alert("Invoice download started (demo)")}
+                className="px-3 py-1 bg-indigo-500 text-white rounded"
+              >
+                Download Invoice
+              </button>
+              <button
+                onClick={() => {
+                  raiseTicket(campaignToShow.id);
+                  alert("Ticket raised (demo)");
+                }}
+                className="px-3 py-1 border rounded"
+              >
+                Raise Ticket
+              </button>
+            </div>
+
+            <div className="pt-3 text-center text-gray-500 italic">
+              Thank you for your collaboration. Payment is being processed as
+              per schedule.
+            </div>
           </div>
         )}
       </Modal>
     </div>
-  );/* Creator Directory module render */
+  ); /* Creator Directory module render */
   const CreatorDirectoryModule = () => (
     <CreatorDirectory
       profile={profile}
@@ -1978,12 +2153,18 @@ export default function App() {
             campaigns={campaigns}
             openBrief={openBriefModal}
             activeChatCampaignId={activeChatCampaignId}
+            openChat={openChat}
           />
         );
       case "Campaigns & Contracts":
         return renderCampaignsModule();
       case "Payments":
-        return <PaymentsModule campaignToShow={paymentModalCampaign} clearCampaignToShow={() => setPaymentModalCampaign(null)} />;
+        return (
+          <PaymentsModule
+            campaignToShow={paymentModalCampaign}
+            clearCampaignToShow={() => setPaymentModalCampaign(null)}
+          />
+        );
       case "Performance":
         return <PerformanceModule />;
       default:
