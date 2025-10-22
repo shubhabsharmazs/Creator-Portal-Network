@@ -316,7 +316,7 @@ const Header: React.FC<{ role: Role }> = ({ role }) => (
       </div>
     </div>
   </header>
-);/* Sidebar */
+); /* Sidebar */
 const Sidebar: React.FC<{
   modules: string[];
   selected: string;
@@ -386,7 +386,7 @@ const Sidebar: React.FC<{
       ))}
     </nav>
   </aside>
-);/* Modal (centered) */
+); /* Modal (centered) */
 const Modal: React.FC<{
   open: boolean;
   onClose: () => void;
@@ -398,21 +398,22 @@ const Modal: React.FC<{
     size === "sm" ? "max-w-md" : size === "lg" ? "max-w-4xl" : "max-w-2xl";
   return (
     <>
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div
-        className={`bg-white rounded-lg shadow-lg w-full ${maxW} overflow-auto`}
-      >
-        <div className="p-4 border-b flex items-center justify-between">
-          <div className="font-semibold">{title}</div>
-          <button onClick={onClose} className="px-3 py-1 rounded border">
-            Close
-          </button>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+        <div
+          className={`bg-white rounded-lg shadow-lg w-full ${maxW} overflow-auto`}
+        >
+          <div className="p-4 border-b flex items-center justify-between">
+            <div className="font-semibold">{title}</div>
+            <button onClick={onClose} className="px-3 py-1 rounded border">
+              Close
+            </button>
+          </div>
+          <div className="p-4">{children}</div>
         </div>
-        <div className="p-4">{children}</div>
       </div>
-    </div>
-</>
-);};
+    </>
+  );
+};
 
 /* Uniform card styles: min width and fixed height so cards are same size */
 const cardMinWidth = "min-w-[360px]";
@@ -427,68 +428,71 @@ const CampaignCard: React.FC<{
 }> = ({ c, onOpenBrief, onViewProgress, showActions = false }) => {
   return (
     <>
-    <div
-      className={`${cardMinWidth} ${cardHeight} bg-white rounded-2xl p-4 shadow-lg border hover:shadow-2xl transition flex flex-col justify-between`}
-    >
-      <div>
-        <div className="font-semibold text-lg">{c.name}</div>
-        <div className="text-xs text-gray-500">
-          {c.id} • {c.poc}
-        </div>
-        <div className="mt-2 text-sm text-gray-600 line-clamp-3">{c.brief}</div>
-      </div>
-
-      <div className="flex items-center justify-between mt-3">
-        <div className="flex items-center gap-2">
-          <div
-            className={`text-xs px-2 py-1 rounded ${
-              c.stage
-                ? "bg-indigo-50 text-indigo-700"
-                : "bg-gray-100 text-gray-700"
-            }`}
-          >
-            {c.stage ?? "Invite"}
+      <div
+        className={`${cardMinWidth} ${cardHeight} bg-white rounded-2xl p-4 shadow-lg border hover:shadow-2xl transition flex flex-col justify-between`}
+      >
+        <div>
+          <div className="font-semibold text-lg">{c.name}</div>
+          <div className="text-xs text-gray-500">
+            {c.id} • {c.poc}
           </div>
-          {c.paymentStatus && (
+          <div className="mt-2 text-sm text-gray-600 line-clamp-3">
+            {c.brief}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between mt-3">
+          <div className="flex items-center gap-2">
             <div
               className={`text-xs px-2 py-1 rounded ${
-                c.paymentStatus === "Paid"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-yellow-100 text-yellow-800"
+                c.stage
+                  ? "bg-indigo-50 text-indigo-700"
+                  : "bg-gray-100 text-gray-700"
               }`}
             >
-              {c.paymentStatus}
+              {c.stage ?? "Invite"}
             </div>
-          )}
-          {c.isNew && (
-            <div className="text-xs px-2 py-1 rounded bg-green-100 text-green-800">
-              New
-            </div>
-          )}
-        </div>
+            {c.paymentStatus && (
+              <div
+                className={`text-xs px-2 py-1 rounded ${
+                  c.paymentStatus === "Paid"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-yellow-100 text-yellow-800"
+                }`}
+              >
+                {c.paymentStatus}
+              </div>
+            )}
+            {c.isNew && (
+              <div className="text-xs px-2 py-1 rounded bg-green-100 text-green-800">
+                New
+              </div>
+            )}
+          </div>
 
-        <div className="flex items-center gap-2">
-          {onOpenBrief && (
-            <button
-              onClick={() => onOpenBrief(c)}
-              className="px-3 py-1 bg-indigo-600 text-white rounded"
-            >
-              Open Brief
-            </button>
-          )}
-          {onViewProgress && (
-            <button
-              onClick={() => onViewProgress(c)}
-              className="px-3 py-1 border rounded"
-            >
-              View Progress
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {onOpenBrief && (
+              <button
+                onClick={() => onOpenBrief(c)}
+                className="px-3 py-1 bg-indigo-600 text-white rounded"
+              >
+                Open Brief
+              </button>
+            )}
+            {onViewProgress && (
+              <button
+                onClick={() => onViewProgress(c)}
+                className="px-3 py-1 border rounded"
+              >
+                View Progress
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-</>
-);};
+    </>
+  );
+};
 
 /* Progress Tracker component */
 const ProgressTracker: React.FC<{
@@ -505,36 +509,36 @@ const ProgressTracker: React.FC<{
   const idx = stage ? stages.indexOf(stage) : -1;
   return (
     <>
-    <div>
-      <div className="flex items-center gap-6 overflow-auto">
-        {stages.map((s, i) => (
-          <div key={s} className="flex items-center gap-3">
-            <div
-              className={`w-8 h-8 flex items-center justify-center rounded-full ${
-                i <= idx
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-100 text-gray-500"
-              }`}
-            >
-              {i + 1}
+      <div>
+        <div className="flex items-center gap-6 overflow-auto">
+          {stages.map((s, i) => (
+            <div key={s} className="flex items-center gap-3">
+              <div
+                className={`w-8 h-8 flex items-center justify-center rounded-full ${
+                  i <= idx
+                    ? "bg-indigo-600 text-white"
+                    : "bg-gray-100 text-gray-500"
+                }`}
+              >
+                {i + 1}
+              </div>
+              <div
+                className={`${
+                  i <= idx ? "font-semibold text-gray-800" : "text-gray-400"
+                }`}
+              >
+                {s}
+              </div>
             </div>
-            <div
-              className={`${
-                i <= idx ? "font-semibold text-gray-800" : "text-gray-400"
-              }`}
-            >
-              {s}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        <div className="mt-3">
+          {/* Progress is display-only in creator view (no manual advance) */}
+        </div>
       </div>
-      <div className="mt-3">
-        {/* Progress is display-only in creator view (no manual advance) */}
-     
-      </div>
-    </div>
-</>
-);};
+    </>
+  );
+};
 
 /* Payment Card - same size as campaign cards */
 const PaymentCard: React.FC<{
@@ -573,7 +577,7 @@ const PaymentCard: React.FC<{
       </button>
     </div>
   </div>
-);/* Tickets view */
+); /* Tickets view */
 const TicketsView: React.FC<{
   tickets: Ticket[];
   onAddMessage: (ticketId: string, text: string) => void;
@@ -582,97 +586,98 @@ const TicketsView: React.FC<{
   const [msg, setMsg] = useState("");
   return (
     <>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div className="col-span-1">
-        <div className="p-3 bg-white rounded-lg shadow">
-          <h4 className="font-semibold mb-2">Tickets</h4>
-          <div className="space-y-2">
-            {tickets.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setOpen(t)}
-                className={`block w-full text-left p-2 rounded ${
-                  open?.id === t.id ? "bg-indigo-50" : "hover:bg-gray-100"
-                }`}
-              >
-                <div className="font-medium">{t.subject}</div>
-                <div className="text-xs text-gray-500">
-                  {t.id} • {t.campaignId ?? "General"}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="col-span-1">
+          <div className="p-3 bg-white rounded-lg shadow">
+            <h4 className="font-semibold mb-2">Tickets</h4>
+            <div className="space-y-2">
+              {tickets.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setOpen(t)}
+                  className={`block w-full text-left p-2 rounded ${
+                    open?.id === t.id ? "bg-indigo-50" : "hover:bg-gray-100"
+                  }`}
+                >
+                  <div className="font-medium">{t.subject}</div>
+                  <div className="text-xs text-gray-500">
+                    {t.id} • {t.campaignId ?? "General"}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="col-span-2">
+          <div className="p-4 bg-white rounded-lg shadow">
+            {open ? (
+              <>
+                <div className="flex justify-between items-center mb-3">
+                  <div>
+                    <div className="font-semibold">{open.subject}</div>
+                    <div className="text-xs text-gray-500">{open.id}</div>
+                  </div>
+                  <div
+                    className={`px-2 py-1 rounded ${
+                      open.status === "Resolved"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}
+                  >
+                    {open.status}
+                  </div>
                 </div>
-              </button>
-            ))}
+
+                <div className="h-64 overflow-auto border rounded p-3 space-y-2 mb-3">
+                  {open.messages.map((m, i) => (
+                    <div
+                      key={i}
+                      className={`p-2 rounded ${
+                        m.from === "Creator"
+                          ? "bg-indigo-50 self-end"
+                          : "bg-gray-100"
+                      }`}
+                    >
+                      <div className="text-sm font-medium">{m.from}</div>
+                      <div className="text-sm">{m.text}</div>
+                      <div className="text-xs text-gray-400 mt-1">
+                        {timeAgo(m.time)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex gap-2">
+                  <input
+                    value={msg}
+                    onChange={(e) => setMsg(e.target.value)}
+                    className="flex-1 p-2 border rounded"
+                    placeholder="Write a message..."
+                  />
+                  <button
+                    onClick={() => {
+                      if (!msg.trim()) return;
+                      onAddMessage(open.id, msg.trim());
+                      setMsg("");
+                    }}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded"
+                  >
+                    Send
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="text-gray-500">
+                Select a ticket to view conversation
+              </div>
+            )}
           </div>
         </div>
       </div>
-
-      <div className="col-span-2">
-        <div className="p-4 bg-white rounded-lg shadow">
-          {open ? (
-            <>
-              <div className="flex justify-between items-center mb-3">
-                <div>
-                  <div className="font-semibold">{open.subject}</div>
-                  <div className="text-xs text-gray-500">{open.id}</div>
-                </div>
-                <div
-                  className={`px-2 py-1 rounded ${
-                    open.status === "Resolved"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-yellow-100 text-yellow-800"
-                  }`}
-                >
-                  {open.status}
-                </div>
-              </div>
-
-              <div className="h-64 overflow-auto border rounded p-3 space-y-2 mb-3">
-                {open.messages.map((m, i) => (
-                  <div
-                    key={i}
-                    className={`p-2 rounded ${
-                      m.from === "Creator"
-                        ? "bg-indigo-50 self-end"
-                        : "bg-gray-100"
-                    }`}
-                  >
-                    <div className="text-sm font-medium">{m.from}</div>
-                    <div className="text-sm">{m.text}</div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      {timeAgo(m.time)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex gap-2">
-                <input
-                  value={msg}
-                  onChange={(e) => setMsg(e.target.value)}
-                  className="flex-1 p-2 border rounded"
-                  placeholder="Write a message..."
-                />
-                <button
-                  onClick={() => {
-                    if (!msg.trim()) return;
-                    onAddMessage(open.id, msg.trim());
-                    setMsg("");
-                  }}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded"
-                >
-                  Send
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="text-gray-500">
-              Select a ticket to view conversation
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-</>
-);};
+    </>
+  );
+};
 
 /* Payment Info form */
 const PaymentInfoForm: React.FC<{
@@ -684,98 +689,100 @@ const PaymentInfoForm: React.FC<{
   useEffect(() => setLocal(payment), [payment]);
   return (
     <>
-    <div className="p-4 bg-white rounded-lg shadow">
-      <div className="flex justify-between items-center">
-        <h3 className="font-semibold">Payment Info & Tax Documentation</h3>
-        <button
-          onClick={() => setEditing((e) => !e)}
-          className="px-3 py-1 rounded bg-indigo-50 text-indigo-700"
-        >
-          {editing ? "Cancel" : "Edit"}
-        </button>
-      </div>
-
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div>
-          <label className="text-xs text-gray-500">Bank Account</label>
-          {editing ? (
-            <input
-              value={local.account}
-              onChange={(e) =>
-                setLocal((l: any) => ({ ...l, account: e.target.value }))
-              }
-              className="mt-1 p-2 border rounded w-full"
-            />
-          ) : (
-            <div className="mt-1 p-2 border rounded bg-gray-50">
-              {payment.account}
-            </div>
-          )}
-        </div>
-        <div>
-          <label className="text-xs text-gray-500">IFSC / Routing</label>
-          {editing ? (
-            <input
-              value={local.ifsc}
-              onChange={(e) =>
-                setLocal((l: any) => ({ ...l, ifsc: e.target.value }))
-              }
-              className="mt-1 p-2 border rounded w-full"
-            />
-          ) : (
-            <div className="mt-1 p-2 border rounded bg-gray-50">
-              {payment.ifsc ?? "Not provided"}
-            </div>
-          )}
+      <div className="p-4 bg-white rounded-lg shadow">
+        <div className="flex justify-between items-center">
+          <h3 className="font-semibold">Payment Info & Tax Documentation</h3>
+          <button
+            onClick={() => setEditing((e) => !e)}
+            className="px-3 py-1 rounded bg-indigo-50 text-indigo-700"
+          >
+            {editing ? "Cancel" : "Edit"}
+          </button>
         </div>
 
-        <div className="md:col-span-2">
-          <label className="text-xs text-gray-500">Tax Document</label>
-          <div className="mt-2 flex items-center gap-3">
-            <div className="p-2 border rounded bg-gray-50">
-              {payment.taxDocument ?? "No tax document uploaded"}
-            </div>
-            {editing && (
-              <button
-                onClick={() => {
-                  const doc = prompt(
-                    "Enter tax document name (simulate upload)"
-                  );if (doc) setLocal((l: any) => ({ ...l, taxDocument: doc }));
-                }}
-                className="px-3 py-1 bg-indigo-600 text-white rounded"
-              >
-                Upload
-              </button>
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs text-gray-500">Bank Account</label>
+            {editing ? (
+              <input
+                value={local.account}
+                onChange={(e) =>
+                  setLocal((l: any) => ({ ...l, account: e.target.value }))
+                }
+                className="mt-1 p-2 border rounded w-full"
+              />
+            ) : (
+              <div className="mt-1 p-2 border rounded bg-gray-50">
+                {payment.account}
+              </div>
             )}
           </div>
-        </div>
-      </div>
+          <div>
+            <label className="text-xs text-gray-500">IFSC / Routing</label>
+            {editing ? (
+              <input
+                value={local.ifsc}
+                onChange={(e) =>
+                  setLocal((l: any) => ({ ...l, ifsc: e.target.value }))
+                }
+                className="mt-1 p-2 border rounded w-full"
+              />
+            ) : (
+              <div className="mt-1 p-2 border rounded bg-gray-50">
+                {payment.ifsc ?? "Not provided"}
+              </div>
+            )}
+          </div>
 
-      {editing && (
-        <div className="mt-4 flex justify-end gap-3">
-          <button
-            onClick={() => {
-              setLocal(payment);
-              setEditing(false);
-            }}
-            className="px-4 py-2 border rounded"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => {
-              onSave(local);
-              setEditing(false);
-            }}
-            className="px-4 py-2 bg-indigo-600 text-white rounded"
-          >
-            Save
-          </button>
+          <div className="md:col-span-2">
+            <label className="text-xs text-gray-500">Tax Document</label>
+            <div className="mt-2 flex items-center gap-3">
+              <div className="p-2 border rounded bg-gray-50">
+                {payment.taxDocument ?? "No tax document uploaded"}
+              </div>
+              {editing && (
+                <button
+                  onClick={() => {
+                    const doc = prompt(
+                      "Enter tax document name (simulate upload)"
+                    );
+                    if (doc) setLocal((l: any) => ({ ...l, taxDocument: doc }));
+                  }}
+                  className="px-3 py-1 bg-indigo-600 text-white rounded"
+                >
+                  Upload
+                </button>
+              )}
+            </div>
+          </div>
         </div>
-      )}
-    </div>
-</>
-);};
+
+        {editing && (
+          <div className="mt-4 flex justify-end gap-3">
+            <button
+              onClick={() => {
+                setLocal(payment);
+                setEditing(false);
+              }}
+              className="px-4 py-2 border rounded"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                onSave(local);
+                setEditing(false);
+              }}
+              className="px-4 py-2 bg-indigo-600 text-white rounded"
+            >
+              Save
+            </button>
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
 
 /* Creator Directory (profile + social links) */
 const CreatorDirectory: React.FC<{
@@ -813,210 +820,216 @@ const CreatorDirectory: React.FC<{
 
   return (
     <>
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold">Creator Directory</h2>
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold">Creator Directory</h2>
 
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex items-center justify-between">
-          <div className="font-semibold">Profile</div>
-          <div>
-            <button
-              onClick={() => setEditing((s) => ({ ...s, profile: !s.profile }))}
-              className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded"
-            >
-              {editing.profile ? "Cancel" : "Edit"}
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label className="text-xs text-gray-500">Name</label>
-            <div className="mt-1 p-2 border rounded bg-gray-50">
-              {localProfile.name}
-            </div>
-          </div>
-          <div>
-            <label className="text-xs text-gray-500">Email</label>
-            <div className="mt-1 p-2 border rounded bg-gray-50">
-              {localProfile.email}
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs text-gray-500">Phone</label>
-            {editing.profile ? (
-              <input
-                value={localProfile.phone}
-                onChange={(e) =>
-                  setLocalProfile((l: any) => ({ ...l, phone: e.target.value }))
-                }
-                className="mt-1 p-2 border rounded w-full"
-              />
-            ) : (
-              <div className="mt-1 p-2 border rounded bg-gray-50">
-                {localProfile.phone}
-              </div>
-            )}
-          </div>
-          <div>
-            <label className="text-xs text-gray-500">Creator Type</label>
-            {editing.profile ? (
-              <input
-                value={localProfile.creatorType}
-                onChange={(e) =>
-                  setLocalProfile((l: any) => ({
-                    ...l,
-                    creatorType: e.target.value,
-                  }))
-                }
-                className="mt-1 p-2 border rounded w-full"
-              />
-            ) : (
-              <div className="mt-1 p-2 border rounded bg-gray-50">
-                {localProfile.creatorType}
-              </div>
-            )}
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="text-xs text-gray-500">Bio</label>
-            {editing.profile ? (
-              <textarea
-                value={localProfile.bio}
-                onChange={(e) =>
-                  setLocalProfile((l: any) => ({ ...l, bio: e.target.value }))
-                }
-                className="mt-1 p-2 border rounded w-full"
-                rows={4}
-              />
-            ) : (
-              <div className="mt-1 p-2 border rounded bg-gray-50">
-                {localProfile.bio}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {editing.profile && (
-          <div className="mt-4 flex justify-end gap-3">
-            <button
-              onClick={() => {
-                setLocalProfile(profile);
-                setEditing((s) => ({ ...s, profile: false }));
-              }}
-              className="px-4 py-2 border rounded"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => {
-                onSaveProfile("profile", localProfile);
-                setEditing((s) => ({ ...s, profile: false }));
-              }}
-              className="px-4 py-2 bg-indigo-600 text-white rounded"
-            >
-              Save
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Socials — kept on same page but not as separate sidebar item */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex items-center justify-between">
-          <div className="font-semibold">Social Media Links</div>
-          <div className="text-sm text-gray-500">Add / verify handles</div>
-        </div>
-
-        <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label className="text-xs text-gray-500">Instagram</label>
-            <div className="mt-2 flex items-center gap-2">
-              <input
-                className="p-2 border rounded w-full"
-                value={localSocials.instagram.handle}
-                onChange={(e) =>
-                  setLocalSocials((s: any) => ({
-                    ...s,
-                    instagram: { ...s.instagram, handle: e.target.value },
-                  }))
-                }
-              />
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center justify-between">
+            <div className="font-semibold">Profile</div>
+            <div>
               <button
-                onClick={verifyInstagram}
-                className={`px-3 py-1 rounded ${
-                  localSocials.instagram.verified
-                    ? "bg-green-500 text-white"
-                    : "bg-amber-400 text-white"
-                }`}
+                onClick={() =>
+                  setEditing((s) => ({ ...s, profile: !s.profile }))
+                }
+                className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded"
               >
-                {localSocials.instagram.verified ? "Verified" : "Verify"}
+                {editing.profile ? "Cancel" : "Edit"}
               </button>
             </div>
           </div>
 
-          <div>
-            <label className="text-xs text-gray-500">Facebook</label>
-            <input
-              className="mt-2 p-2 border rounded w-full"
-              value={localSocials.facebook.handle}
-              onChange={(e) =>
-                setLocalSocials((s: any) => ({
-                  ...s,
-                  facebook: { ...s.facebook, handle: e.target.value },
-                }))
-              }
-            />
+          <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-gray-500">Name</label>
+              <div className="mt-1 p-2 border rounded bg-gray-50">
+                {localProfile.name}
+              </div>
+            </div>
+            <div>
+              <label className="text-xs text-gray-500">Email</label>
+              <div className="mt-1 p-2 border rounded bg-gray-50">
+                {localProfile.email}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-500">Phone</label>
+              {editing.profile ? (
+                <input
+                  value={localProfile.phone}
+                  onChange={(e) =>
+                    setLocalProfile((l: any) => ({
+                      ...l,
+                      phone: e.target.value,
+                    }))
+                  }
+                  className="mt-1 p-2 border rounded w-full"
+                />
+              ) : (
+                <div className="mt-1 p-2 border rounded bg-gray-50">
+                  {localProfile.phone}
+                </div>
+              )}
+            </div>
+            <div>
+              <label className="text-xs text-gray-500">Creator Type</label>
+              {editing.profile ? (
+                <input
+                  value={localProfile.creatorType}
+                  onChange={(e) =>
+                    setLocalProfile((l: any) => ({
+                      ...l,
+                      creatorType: e.target.value,
+                    }))
+                  }
+                  className="mt-1 p-2 border rounded w-full"
+                />
+              ) : (
+                <div className="mt-1 p-2 border rounded bg-gray-50">
+                  {localProfile.creatorType}
+                </div>
+              )}
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="text-xs text-gray-500">Bio</label>
+              {editing.profile ? (
+                <textarea
+                  value={localProfile.bio}
+                  onChange={(e) =>
+                    setLocalProfile((l: any) => ({ ...l, bio: e.target.value }))
+                  }
+                  className="mt-1 p-2 border rounded w-full"
+                  rows={4}
+                />
+              ) : (
+                <div className="mt-1 p-2 border rounded bg-gray-50">
+                  {localProfile.bio}
+                </div>
+              )}
+            </div>
           </div>
 
-          <div>
-            <label className="text-xs text-gray-500">Threads</label>
-            <input
-              className="mt-2 p-2 border rounded w-full"
-              value={localSocials.threads.handle}
-              onChange={(e) =>
-                setLocalSocials((s: any) => ({
-                  ...s,
-                  threads: { ...s.threads, handle: e.target.value },
-                }))
-              }
-            />
-          </div>
-
-          <div>
-            <label className="text-xs text-gray-500">TikTok</label>
-            <input
-              className="mt-2 p-2 border rounded w-full"
-              value={localSocials.tiktok.handle}
-              onChange={(e) =>
-                setLocalSocials((s: any) => ({
-                  ...s,
-                  tiktok: { ...s.tiktok, handle: e.target.value },
-                }))
-              }
-            />
-          </div>
+          {editing.profile && (
+            <div className="mt-4 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setLocalProfile(profile);
+                  setEditing((s) => ({ ...s, profile: false }));
+                }}
+                className="px-4 py-2 border rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  onSaveProfile("profile", localProfile);
+                  setEditing((s) => ({ ...s, profile: false }));
+                }}
+                className="px-4 py-2 bg-indigo-600 text-white rounded"
+              >
+                Save
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className="mt-4 flex justify-end gap-3">
-          <button
-            onClick={() => {
-              setLocalSocials(socialsExample);
-            }}
-            className="px-4 py-2 border rounded"
-          >
-            Reset
-          </button>
-          <button
-            onClick={() => {
-              onUpdateSocials(localSocials);
-              alert("Social links saved (local)");
-            }}
-            className="px-4 py-2 bg-indigo-600 text-white rounded"
-          >
-            Save Links
-          </button>
+        {/* Socials — kept on same page but not as separate sidebar item */}
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center justify-between">
+            <div className="font-semibold">Social Media Links</div>
+            <div className="text-sm text-gray-500">Add / verify handles</div>
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-gray-500">Instagram</label>
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  className="p-2 border rounded w-full"
+                  value={localSocials.instagram.handle}
+                  onChange={(e) =>
+                    setLocalSocials((s: any) => ({
+                      ...s,
+                      instagram: { ...s.instagram, handle: e.target.value },
+                    }))
+                  }
+                />
+                <button
+                  onClick={verifyInstagram}
+                  className={`px-3 py-1 rounded ${
+                    localSocials.instagram.verified
+                      ? "bg-green-500 text-white"
+                      : "bg-amber-400 text-white"
+                  }`}
+                >
+                  {localSocials.instagram.verified ? "Verified" : "Verify"}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-500">Facebook</label>
+              <input
+                className="mt-2 p-2 border rounded w-full"
+                value={localSocials.facebook.handle}
+                onChange={(e) =>
+                  setLocalSocials((s: any) => ({
+                    ...s,
+                    facebook: { ...s.facebook, handle: e.target.value },
+                  }))
+                }
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-500">Threads</label>
+              <input
+                className="mt-2 p-2 border rounded w-full"
+                value={localSocials.threads.handle}
+                onChange={(e) =>
+                  setLocalSocials((s: any) => ({
+                    ...s,
+                    threads: { ...s.threads, handle: e.target.value },
+                  }))
+                }
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-500">TikTok</label>
+              <input
+                className="mt-2 p-2 border rounded w-full"
+                value={localSocials.tiktok.handle}
+                onChange={(e) =>
+                  setLocalSocials((s: any) => ({
+                    ...s,
+                    tiktok: { ...s.tiktok, handle: e.target.value },
+                  }))
+                }
+              />
+            </div>
+          </div>
+
+          <div className="mt-4 flex justify-end gap-3">
+            <button
+              onClick={() => {
+                setLocalSocials(socialsExample);
+              }}
+              className="px-4 py-2 border rounded"
+            >
+              Reset
+            </button>
+            <button
+              onClick={() => {
+                onUpdateSocials(localSocials);
+                alert("Social links saved (local)");
+              }}
+              className="px-4 py-2 bg-indigo-600 text-white rounded"
+            >
+              Save Links
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1049,7 +1062,8 @@ const CreatorDirectory: React.FC<{
         </div>
       </Modal>
     </>
-);};
+  );
+};
 
 /* Placeholder social defaults */
 const socialsExample = {
@@ -1069,132 +1083,154 @@ const CommunicationsModule: React.FC<{
   // Keep simple but consistent with earlier implementation; left unchanged in behavior
   return (
     <>
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold">Communication</h2>
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="md:w-1/3">
-            <div className="font-semibold">Campaigns</div>
-            <div className="mt-3 space-y-2">
-{/* Only show ongoing campaigns here */}
-{campaigns
-  .filter((c) =>
-    ["Accepted", "Content Sent", "Approval", "Content Posted Confirmation Sent"].includes(
-      c.stage ?? ""
-    )
-  )
-  .map((c) => (
-    <div
-      key={c.id}
-      onClick={() => openChat && openChat(c.id)}
-      className={`p-3 rounded-lg cursor-pointer border ${
-        c.id === activeChatCampaignId
-          ? "bg-indigo-100 border-indigo-400"
-          : "bg-indigo-50 hover:bg-indigo-100"
-      }`}
-    >
-      <div className="font-medium">{c.name}</div>
-      <div className="text-xs text-gray-500">{c.id}</div>
-    </div>
-  ))}
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold">Communication</h2>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="md:w-1/3">
+              <div className="font-semibold">Campaigns</div>
+              <div className="mt-3 space-y-2">
+                {/* Only show ongoing campaigns here */}
+                {campaigns
+                  .filter((c) =>
+                    [
+                      "Accepted",
+                      "Content Sent",
+                      "Approval",
+                      "Content Posted Confirmation Sent",
+                    ].includes(c.stage ?? "")
+                  )
+                  .map((c) => (
+                    <div
+                      key={c.id}
+                      onClick={() => openChat && openChat(c.id)}
+                      className={`p-3 rounded-lg cursor-pointer border ${
+                        c.id === activeChatCampaignId
+                          ? "bg-indigo-100 border-indigo-400"
+                          : "bg-indigo-50 hover:bg-indigo-100"
+                      }`}
+                    >
+                      <div className="font-medium">{c.name}</div>
+                      <div className="text-xs text-gray-500">{c.id}</div>
+                    </div>
+                  ))}
 
-{/* If no ongoing campaigns available */}
-{campaigns.filter((c) =>
-  ["Accepted", "Content Sent", "Approval", "Content Posted Confirmation Sent"].includes(
-    c.stage ?? ""
-  )
-).length === 0 && (
-  <div className="text-sm text-gray-500 p-2">
-    No ongoing campaigns available.
-  </div>
-)}
+                {/* If no ongoing campaigns available */}
+                {campaigns.filter((c) =>
+                  [
+                    "Accepted",
+                    "Content Sent",
+                    "Approval",
+                    "Content Posted Confirmation Sent",
+                  ].includes(c.stage ?? "")
+                ).length === 0 && (
+                  <div className="text-sm text-gray-500 p-2">
+                    No ongoing campaigns available.
+                  </div>
+                )}
+              </div>
+            </div>
 
+            <div className="md:flex-1">
+              <div className="font-semibold">Messages</div>
+              <div className="mt-3 p-4 bg-gray-50 rounded">
+                {activeChatCampaignId ? (
+                  (() => {
+                    const c = campaigns.find(
+                      (x) => x.id === activeChatCampaignId
+                    );
+                    if (!c)
+                      return (
+                        <>
+                          <div className="text-sm text-gray-500">
+                            Selected campaign not found.
+                          </div>
+                        </>
+                      );
+                    const messages = [
+                      {
+                        from: "POC",
+                        text: `Hi ${c.name}, please share your draft soon.`,
+                        time: "2d ago",
+                      },
+                      {
+                        from: "Creator",
+                        text: "Sure, I’ll upload by tonight!",
+                        time: "1d ago",
+                      },
+                    ];
+
+                    return (
+                      <>
+                        <div className="flex flex-col h-96 bg-gray-50 rounded p-4">
+                          {/* Chat Messages */}
+                          <div className="flex-1 overflow-auto space-y-2">
+                            {messages.map((m, i) => (
+                              <div
+                                key={i}
+                                className={`p-2 rounded max-w-[70%] ${
+                                  m.from === "Creator"
+                                    ? "bg-indigo-100 self-end ml-auto"
+                                    : "bg-white mr-auto"
+                                }`}
+                              >
+                                <div className="text-xs font-medium text-gray-500">
+                                  {m.from}
+                                </div>
+                                <div className="text-sm">{m.text}</div>
+                                <div className="text-xs text-gray-400">
+                                  {m.time}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Input Box */}
+                          <div className="mt-3 flex items-center gap-2">
+                            <button
+                              onClick={() => alert("Upload file (demo)")}
+                              className="px-3 py-2 border rounded text-lg"
+                              title="Upload content"
+                            >
+                              +
+                            </button>
+                            <input
+                              id="chat-input"
+                              placeholder="Write a message..."
+                              className="flex-1 p-2 border rounded"
+                            />
+                            <button
+                              onClick={() => {
+                                const el = document.getElementById(
+                                  "chat-input"
+                                ) as HTMLInputElement | null;
+                                if (!el || !el.value.trim())
+                                  return alert("Enter a message");
+                                alert("Message sent (demo): " + el.value);
+                                el.value = "";
+                              }}
+                              className="px-4 py-2 bg-indigo-600 text-white rounded"
+                            >
+                              Send
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()
+                ) : (
+                  <div className="text-sm text-gray-500">
+                    Select a campaign from the left to open its chat.
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-
-          <div className="md:flex-1">
-            <div className="font-semibold">Messages</div>
-            <div className="mt-3 p-4 bg-gray-50 rounded h-64 overflow-auto">
-              {activeChatCampaignId ? (
-  (() => {
-    const c = campaigns.find((x) => x.id === activeChatCampaignId);
-    if (!c)
-      return (
-        <>
-        <div className="text-sm text-gray-500">
-          Selected campaign not found.
-        </div>
-        </>
-      );const messages = [
-      { from: "POC", text: `Hi ${c.name}, please share your draft soon.`, time: "2d ago" },
-      { from: "Creator", text: "Sure, I’ll upload by tonight!", time: "1d ago" },
-    ];
-
-    return (
-      <>
-      <div className="flex flex-col h-96 bg-gray-50 rounded p-4">
-        {/* Chat Messages */}
-        <div className="flex-1 overflow-auto space-y-2">
-          {messages.map((m, i) => (
-            <div
-              key={i}
-              className={`p-2 rounded max-w-[70%] ${
-                m.from === "Creator"
-                  ? "bg-indigo-100 self-end ml-auto"
-                  : "bg-white mr-auto"
-              }`}
-            >
-              <div className="text-xs font-medium text-gray-500">{m.from}</div>
-              <div className="text-sm">{m.text}</div>
-              <div className="text-xs text-gray-400">{m.time}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Input Box */}
-        <div className="mt-3 flex items-center gap-2">
-          <button
-            onClick={() => alert("Upload file (demo)")}
-            className="px-3 py-2 border rounded text-lg"
-            title="Upload content"
-          >
-            +
-          </button>
-          <input
-            id="chat-input"
-            placeholder="Write a message..."
-            className="flex-1 p-2 border rounded"
-          />
-          <button
-            onClick={() => {
-              const el = document.getElementById("chat-input") as HTMLInputElement | null;
-              if (!el || !el.value.trim()) return alert("Enter a message");
-              alert("Message sent (demo): " + el.value);
-              el.value = "";
-            }}
-            className="px-4 py-2 bg-indigo-600 text-white rounded"
-          >
-            Send
-          </button>
         </div>
       </div>
-      </>
-    );})()
-) : (
-  <div className="text-sm text-gray-500">
-    Select a campaign from the left to open its chat.
-  </div>
-)}
-
-                </div>
-              }
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-</>
-);};
+    </>
+  );
+};
 
 /* ---------------------------
    Main App
@@ -1238,12 +1274,15 @@ export default function App() {
 
   const [selectedModule, setSelectedModule] = useState<string>(
     "Campaigns & Contracts"
-  );const [selectedSub, setSelectedSub] = useState<string>(
+  );
+  const [selectedSub, setSelectedSub] = useState<string>(
     "All Campaigns & Contracts"
-  );// data
+  );
+  // data
   const [campaigns, setCampaigns] = useState<Campaign[]>(() =>
     makeMockCampaigns()
-  );const [tickets, setTickets] = useState<Ticket[]>(seedTickets);
+  );
+  const [tickets, setTickets] = useState<Ticket[]>(seedTickets);
   const [paymentInfo, setPaymentInfo] = useState({
     account: "XXXXXXXXXXXX1234",
     ifsc: "HDFC0001234",
@@ -1284,17 +1323,21 @@ export default function App() {
   const availableList = useMemo(
     () => campaigns.filter((c) => !c.stage && !c.isBroadcast && !c.declined),
     [campaigns]
-  );const ongoingList = useMemo(
+  );
+  const ongoingList = useMemo(
     () => campaigns.filter((c) => c.stage && c.stage !== "Post Approval"),
     [campaigns]
-  );const completedList = useMemo(
+  );
+  const completedList = useMemo(
     () => campaigns.filter((c) => c.stage === "Post Approval" || c.declined),
     [campaigns]
-  );const updateRequestsList = useMemo(
+  );
+  const updateRequestsList = useMemo(
     () =>
       campaigns.filter((c) => c.updateRequests && c.updateRequests.length > 0),
     [campaigns]
-  );/* Utilities */
+  );
+  /* Utilities */
   const openBriefModal = (c: Campaign) => {
     setBriefCampaign(c);
     setBriefOpen(true);
@@ -1309,7 +1352,8 @@ export default function App() {
       cs.map((c) =>
         c.id === id ? { ...c, stage: "Accepted", isNew: false } : c
       )
-    );closeBriefModal();
+    );
+    closeBriefModal();
   };
 
   const declineInvite = (id: string) => {
@@ -1321,7 +1365,8 @@ export default function App() {
           ? { ...c, declined: { reason, by: "Creator", time: Date.now() } }
           : c
       )
-    );closeBriefModal();
+    );
+    closeBriefModal();
   };
 
   const updateRequestFromBrief = (id: string, message: string) => {
@@ -1342,7 +1387,8 @@ export default function App() {
             }
           : c
       )
-    );closeBriefModal();
+    );
+    closeBriefModal();
   };
 
   const advanceStage = (id: string, next: CampaignStage) => {
@@ -1356,7 +1402,8 @@ export default function App() {
         }
         return updated;
       })
-    );};
+    );
+  };
 
   // Payments: raise ticket
   const raiseTicket = (campaignId?: string) => {
@@ -1393,7 +1440,8 @@ export default function App() {
             }
           : t
       )
-    );};
+    );
+  };
 
   const savePaymentInfo = (p: any) => {
     setPaymentInfo(p);
@@ -1419,7 +1467,8 @@ export default function App() {
             }
           : c
       )
-    );alert("Update request sent; campaign moved to Update Requests.");
+    );
+    alert("Update request sent; campaign moved to Update Requests.");
   };
 
   // Filter helpers
@@ -1442,7 +1491,8 @@ export default function App() {
   const paymentsList = useMemo(
     () => campaigns.filter((c) => c.paymentStatus),
     [campaigns]
-  );const filteredPayments = useMemo(
+  );
+  const filteredPayments = useMemo(
     () =>
       paymentsList.filter((c) => {
         const searchMatch =
@@ -1455,7 +1505,8 @@ export default function App() {
         return searchMatch && statusMatch;
       }),
     [paymentsList, searchPayments, filterPaymentStatus]
-  );/* Brief Modal content component */
+  );
+  /* Brief Modal content component */
   const BriefModalContent: React.FC<{ campaign: Campaign | null }> = ({
     campaign,
   }) => {
@@ -1493,57 +1544,59 @@ export default function App() {
           Microsoft Campaign Team
         </p>
       </div>
-    );return (
+    );
+    return (
       <>
-      <div>
-        <div className="bg-gray-50 rounded p-4 mb-4">{letter}</div>
+        <div>
+          <div className="bg-gray-50 rounded p-4 mb-4">{letter}</div>
 
-        {isAvailable ? (
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => acceptInvite(campaign.id)}
-              className="px-4 py-2 bg-green-600 text-white rounded"
-            >
-              Accept
-            </button>
-            <button
-              onClick={() => declineInvite(campaign.id)}
-              className="px-4 py-2 bg-red-100 text-red-700 rounded"
-            >
-              Decline
-            </button>
-
-            <div className="ml-auto w-full md:w-auto flex items-center gap-2">
-              <input
-                value={msg}
-                onChange={(e) => setMsg(e.target.value)}
-                placeholder={`Message to ${campaign.poc}`}
-                className="p-2 border rounded flex-1"
-              />
+          {isAvailable ? (
+            <div className="flex items-center gap-3">
               <button
-                onClick={() => {
-                  if (!msg.trim()) {
-                    alert("Enter message");
-                    return;
-                  }
-                  updateRequestFromBrief(campaign.id, msg.trim());
-                  setMsg("");
-                }}
-                className="px-3 py-2 bg-yellow-500 rounded text-white"
+                onClick={() => acceptInvite(campaign.id)}
+                className="px-4 py-2 bg-green-600 text-white rounded"
               >
-                Update Request
+                Accept
               </button>
+              <button
+                onClick={() => declineInvite(campaign.id)}
+                className="px-4 py-2 bg-red-100 text-red-700 rounded"
+              >
+                Decline
+              </button>
+
+              <div className="ml-auto w-full md:w-auto flex items-center gap-2">
+                <input
+                  value={msg}
+                  onChange={(e) => setMsg(e.target.value)}
+                  placeholder={`Message to ${campaign.poc}`}
+                  className="p-2 border rounded flex-1"
+                />
+                <button
+                  onClick={() => {
+                    if (!msg.trim()) {
+                      alert("Enter message");
+                      return;
+                    }
+                    updateRequestFromBrief(campaign.id, msg.trim());
+                    setMsg("");
+                  }}
+                  className="px-3 py-2 bg-yellow-500 rounded text-white"
+                >
+                  Update Request
+                </button>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="text-sm text-gray-600">
-            This is a read-only brief (actions are available only for Available
-            invites).
-          </div>
-        )}
-      </div>
+          ) : (
+            <div className="text-sm text-gray-600">
+              This is a read-only brief (actions are available only for
+              Available invites).
+            </div>
+          )}
+        </div>
       </>
-    );};
+    );
+  };
 
   /* view progress popup content */
   const ProgressPopupContent: React.FC<{ campaign: Campaign | null }> = ({
@@ -1552,41 +1605,42 @@ export default function App() {
     if (!campaign) return null;
     return (
       <>
-      <div>
-        <div className="text-sm">
-          Current Stage: <strong>{campaign.stage ?? "Invite"}</strong>
-        </div>
-        <div className="h-64 overflow-auto border rounded p-3 mt-3 space-y-2">
-          {(campaign.updateRequests ?? []).map((u) => (
-            <div key={u.id} className="p-2 bg-indigo-50 rounded">
-              <div className="text-sm font-medium">You</div>
-              <div className="text-sm">{u.message}</div>
-              <div className="text-xs text-gray-400 mt-1">
-                {timeAgo(u.time)}
+        <div>
+          <div className="text-sm">
+            Current Stage: <strong>{campaign.stage ?? "Invite"}</strong>
+          </div>
+          <div className="h-64 overflow-auto border rounded p-3 mt-3 space-y-2">
+            {(campaign.updateRequests ?? []).map((u) => (
+              <div key={u.id} className="p-2 bg-indigo-50 rounded">
+                <div className="text-sm font-medium">You</div>
+                <div className="text-sm">{u.message}</div>
+                <div className="text-xs text-gray-400 mt-1">
+                  {timeAgo(u.time)}
+                </div>
+              </div>
+            ))}
+            <div className="p-2 bg-gray-100 rounded">
+              <div className="text-sm font-medium">Microsoft User</div>
+              <div className="text-sm">
+                Simulated response message from POC (demo)
               </div>
             </div>
-          ))}
-          <div className="p-2 bg-gray-100 rounded">
-            <div className="text-sm font-medium">Microsoft User</div>
-            <div className="text-sm">
-              Simulated response message from POC (demo)
-            </div>
+          </div>
+
+          <div className="mt-3">
+            <label className="text-xs text-gray-500">Send message to POC</label>
+            <SendToPOCForm
+              campaign={campaign}
+              onSend={(msg) => {
+                sendMessageToPOC(campaign.id, msg);
+                setProgressPopup({ open: false, campaign: null });
+              }}
+            />
           </div>
         </div>
-
-        <div className="mt-3">
-          <label className="text-xs text-gray-500">Send message to POC</label>
-          <SendToPOCForm
-            campaign={campaign}
-            onSend={(msg) => {
-              sendMessageToPOC(campaign.id, msg);
-              setProgressPopup({ open: false, campaign: null });
-            }}
-          />
-        </div>
-      </div>
       </>
-    );};
+    );
+  };
 
   const SendToPOCForm: React.FC<{
     campaign: Campaign;
@@ -1595,32 +1649,33 @@ export default function App() {
     const [msg, setMsg] = useState("");
     return (
       <>
-      <div className="flex items-center gap-2 mt-2">
-        <div className="text-xs text-gray-500">
-          To: <b>{campaign.poc}</b>
+        <div className="flex items-center gap-2 mt-2">
+          <div className="text-xs text-gray-500">
+            To: <b>{campaign.poc}</b>
+          </div>
+          <input
+            value={msg}
+            onChange={(e) => setMsg(e.target.value)}
+            placeholder="Write message..."
+            className="p-2 border rounded flex-1"
+          />
+          <button
+            onClick={() => {
+              if (!msg.trim()) {
+                alert("Enter message");
+                return;
+              }
+              onSend(msg.trim());
+              setMsg("");
+            }}
+            className="px-3 py-2 bg-indigo-600 text-white rounded"
+          >
+            Send
+          </button>
         </div>
-        <input
-          value={msg}
-          onChange={(e) => setMsg(e.target.value)}
-          placeholder="Write message..."
-          className="p-2 border rounded flex-1"
-        />
-        <button
-          onClick={() => {
-            if (!msg.trim()) {
-              alert("Enter message");
-              return;
-            }
-            onSend(msg.trim());
-            setMsg("");
-          }}
-          className="px-3 py-2 bg-indigo-600 text-white rounded"
-        >
-          Send
-        </button>
-      </div>
       </>
-    );};
+    );
+  };
 
   /* Creator Directory handlers */
   const saveProfileSection = (section: string, data: any) => {
@@ -1647,288 +1702,295 @@ export default function App() {
       availableList,
       searchAvailable,
       filterAvailable
-    );const ongoingFiltered = filterStrip(ongoingList, searchOngoing);
+    );
+    const ongoingFiltered = filterStrip(ongoingList, searchOngoing);
     const completedFiltered = filterStrip(completedList, searchCompleted);
     const updateFiltered = filterStrip(updateRequestsList, searchUpdate);
 
     return (
       <>
-      <div className="space-y-6">
-        <h2 className="text-lg font-semibold">Campaigns & Contracts</h2>
+        <div className="space-y-6">
+          <h2 className="text-lg font-semibold">Campaigns & Contracts</h2>
 
-        {/* Available */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="font-semibold">Available & New Opportunities</div>
-              <div className="text-xs text-gray-500">Invite-only campaigns</div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <input
-                value={searchAvailable}
-                onChange={(e) => setSearchAvailable(e.target.value)}
-                placeholder="Search by name or id"
-                className="p-2 border rounded"
-              />
-              <select
-                value={filterAvailable}
-                onChange={(e) => setFilterAvailable(e.target.value)}
-                className="p-2 border rounded"
-              >
-                <option>All</option>
-                <option>Today</option>
-                <option>This Week</option>
-                <option>This Month</option>
-                <option>This Year</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-400">
-            {availableFiltered.length === 0 && (
-              <div className="text-gray-500 p-4">
-                No invites match your search / filter.
-              </div>
-            )}
-            {availableFiltered.map((c) => (
-              <div key={c.id} className="inline-block mr-3">
-                <CampaignCard c={c} onOpenBrief={openBriefModal} />
-              </div>
-            ))}
-            {/* ensure at least 10 cards */}
-            {Array.from({
-              length: Math.max(0, 10 - availableFiltered.length),
-            }).map((_, i) => (
-              <div key={"avail-pad-" + i} className="inline-block mr-3">
-                <div
-                  className={`${cardMinWidth} ${cardHeight} bg-white/60 rounded-2xl p-4 border-dashed border-2 border-gray-200 text-gray-400 flex items-center justify-center`}
-                >
-                  Placeholder
+          {/* Available */}
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="font-semibold">
+                  Available & New Opportunities
+                </div>
+                <div className="text-xs text-gray-500">
+                  Invite-only campaigns
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Ongoing */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="font-semibold">Ongoing Campaigns</div>
-              <div className="text-xs text-gray-500">
-                Track progress of active campaigns
-              </div>
-            </div>
-            <div>
-              <input
-                value={searchOngoing}
-                onChange={(e) => setSearchOngoing(e.target.value)}
-                placeholder="Search by name or id"
-                className="p-2 border rounded"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-400">
-            {ongoingFiltered.length === 0 && (
-              <div className="text-gray-500 p-4">
-                No ongoing campaigns match your filters.
-              </div>
-            )}
-            {ongoingFiltered.map((c) => (
-              <div key={c.id} className="inline-block mr-3">
-                <div
-                  className={`${cardMinWidth} ${cardHeight} bg-white rounded-2xl p-4 shadow-lg border`}
+              <div className="flex items-center gap-2">
+                <input
+                  value={searchAvailable}
+                  onChange={(e) => setSearchAvailable(e.target.value)}
+                  placeholder="Search by name or id"
+                  className="p-2 border rounded"
+                />
+                <select
+                  value={filterAvailable}
+                  onChange={(e) => setFilterAvailable(e.target.value)}
+                  className="p-2 border rounded"
                 >
-                  <div className="flex items-start justify-between">
+                  <option>All</option>
+                  <option>Today</option>
+                  <option>This Week</option>
+                  <option>This Month</option>
+                  <option>This Year</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-400">
+              {availableFiltered.length === 0 && (
+                <div className="text-gray-500 p-4">
+                  No invites match your search / filter.
+                </div>
+              )}
+              {availableFiltered.map((c) => (
+                <div key={c.id} className="inline-block mr-3">
+                  <CampaignCard c={c} onOpenBrief={openBriefModal} />
+                </div>
+              ))}
+              {/* ensure at least 10 cards */}
+              {Array.from({
+                length: Math.max(0, 10 - availableFiltered.length),
+              }).map((_, i) => (
+                <div key={"avail-pad-" + i} className="inline-block mr-3">
+                  <div
+                    className={`${cardMinWidth} ${cardHeight} bg-white/60 rounded-2xl p-4 border-dashed border-2 border-gray-200 text-gray-400 flex items-center justify-center`}
+                  >
+                    Placeholder
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Ongoing */}
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="font-semibold">Ongoing Campaigns</div>
+                <div className="text-xs text-gray-500">
+                  Track progress of active campaigns
+                </div>
+              </div>
+              <div>
+                <input
+                  value={searchOngoing}
+                  onChange={(e) => setSearchOngoing(e.target.value)}
+                  placeholder="Search by name or id"
+                  className="p-2 border rounded"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-400">
+              {ongoingFiltered.length === 0 && (
+                <div className="text-gray-500 p-4">
+                  No ongoing campaigns match your filters.
+                </div>
+              )}
+              {ongoingFiltered.map((c) => (
+                <div key={c.id} className="inline-block mr-3">
+                  <div
+                    className={`${cardMinWidth} ${cardHeight} bg-white rounded-2xl p-4 shadow-lg border`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="font-semibold text-lg">{c.name}</div>
+                        <div className="text-xs text-gray-500">
+                          {c.id} • {c.poc}
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {timeAgo(c.createdAt)}
+                      </div>
+                    </div>
+
+                    <div className="mt-3">
+                      <ProgressTracker
+                        stage={c.stage}
+                        onAdvance={(next) => advanceStage(c.id, next)}
+                      />
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          onClick={() => openBriefModal(c)}
+                          className="px-3 py-1 bg-indigo-600 text-white rounded"
+                        >
+                          Open Brief
+                        </button>
+                        <button
+                          onClick={() => openChat(c.id)}
+                          className="px-3 py-1 border rounded"
+                        >
+                          View Messages
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {Array.from({
+                length: Math.max(0, 10 - ongoingFiltered.length),
+              }).map((_, i) => (
+                <div key={"ongo-pad-" + i} className="inline-block mr-3">
+                  <div
+                    className={`${cardMinWidth} ${cardHeight} bg-white/60 rounded-2xl p-4 border-dashed border-2 border-gray-200 text-gray-400 flex items-center justify-center`}
+                  >
+                    Placeholder
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Update Requests */}
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="font-semibold">Update Requests</div>
+                <div className="text-xs text-gray-500">
+                  Campaigns where you requested updates
+                </div>
+              </div>
+              <div>
+                <input
+                  value={searchUpdate}
+                  onChange={(e) => setSearchUpdate(e.target.value)}
+                  placeholder="Search by name or id"
+                  className="p-2 border rounded"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-400">
+              {updateFiltered.length === 0 && (
+                <div className="text-gray-500 p-4">No update requests yet.</div>
+              )}
+              {updateFiltered.map((c) => (
+                <div key={c.id} className="inline-block mr-3">
+                  <div
+                    className={`${cardMinWidth} ${cardHeight} bg-white rounded-2xl p-4 shadow-lg border`}
+                  >
+                    <div className="font-semibold">{c.name}</div>
+                    <div className="text-xs text-gray-500">
+                      {c.id} • {c.poc}
+                    </div>
+                    <div className="mt-2 text-sm text-gray-600">
+                      {(c.updateRequests ?? [])
+                        .map((u) => u.message)
+                        .join(" • ")}
+                    </div>
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        onClick={() => openBriefModal(c)}
+                        className="px-3 py-1 bg-indigo-600 text-white rounded"
+                      >
+                        Open Brief
+                      </button>
+                      <button
+                        onClick={() => alert("Open conversation (demo)")}
+                        className="px-3 py-1 border rounded"
+                      >
+                        View Messages
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {Array.from({
+                length: Math.max(0, 10 - updateFiltered.length),
+              }).map((_, i) => (
+                <div key={"upd-pad-" + i} className="inline-block mr-3">
+                  <div
+                    className={`${cardMinWidth} ${cardHeight} bg-white/60 rounded-2xl p-4 border-dashed border-2 border-gray-200 text-gray-400 flex items-center justify-center`}
+                  >
+                    Placeholder
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Completed */}
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="font-semibold">Completed & Declined</div>
+                <div className="text-xs text-gray-500">
+                  Completed posts and declined invites
+                </div>
+              </div>
+              <div>
+                <input
+                  value={searchCompleted}
+                  onChange={(e) => setSearchCompleted(e.target.value)}
+                  placeholder="Search by name or id"
+                  className="p-2 border rounded"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-400">
+              {completedFiltered.length === 0 && (
+                <div className="text-gray-500 p-4">
+                  No completed items match your filters.
+                </div>
+              )}
+              {completedFiltered.map((c) => (
+                <div key={c.id} className="inline-block mr-3">
+                  <div
+                    className={`${cardMinWidth} ${cardHeight} bg-white rounded-2xl p-4 shadow-lg border`}
+                  >
                     <div>
                       <div className="font-semibold text-lg">{c.name}</div>
                       <div className="text-xs text-gray-500">
                         {c.id} • {c.poc}
                       </div>
+                      <div className="mt-2 text-sm text-gray-600 line-clamp-3">
+                        {c.brief}
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-500">
-                      {timeAgo(c.createdAt)}
+                    <div className="mt-3 flex gap-2 justify-between items-center">
+                      <button
+                        onClick={() => openBriefModal(c)}
+                        className="px-3 py-1 bg-indigo-600 text-white rounded"
+                      >
+                        Open Brief
+                      </button>
+                      <button
+                        onClick={() => handlePaymentStatusClick(c)}
+                        className="px-3 py-1 border rounded"
+                      >
+                        Payment Status
+                      </button>
                     </div>
                   </div>
-
-<div className="mt-3">
-  <ProgressTracker
-    stage={c.stage}
-    onAdvance={(next) => advanceStage(c.id, next)}
-  />
-  <div className="mt-3 flex gap-2">
-    <button
-      onClick={() => openBriefModal(c)}
-      className="px-3 py-1 bg-indigo-600 text-white rounded"
-    >
-      Open Brief
-    </button>
-    <button
-      onClick={() => openChat(c.id)}
-      className="px-3 py-1 border rounded"
-    >
-      View Messages
-    </button>
-  </div>
-</div>
-
                 </div>
-              </div>
-            ))}
-            {Array.from({
-              length: Math.max(0, 10 - ongoingFiltered.length),
-            }).map((_, i) => (
-              <div key={"ongo-pad-" + i} className="inline-block mr-3">
-                <div
-                  className={`${cardMinWidth} ${cardHeight} bg-white/60 rounded-2xl p-4 border-dashed border-2 border-gray-200 text-gray-400 flex items-center justify-center`}
-                >
-                  Placeholder
+              ))}
+              {Array.from({
+                length: Math.max(0, 10 - completedFiltered.length),
+              }).map((_, i) => (
+                <div key={"comp-pad-" + i} className="inline-block mr-3">
+                  <div
+                    className={`${cardMinWidth} ${cardHeight} bg-white/60 rounded-2xl p-4 border-dashed border-2 border-gray-200 text-gray-400 flex items-center justify-center`}
+                  >
+                    Placeholder
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-
-        {/* Update Requests */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="font-semibold">Update Requests</div>
-              <div className="text-xs text-gray-500">
-                Campaigns where you requested updates
-              </div>
-            </div>
-            <div>
-              <input
-                value={searchUpdate}
-                onChange={(e) => setSearchUpdate(e.target.value)}
-                placeholder="Search by name or id"
-                className="p-2 border rounded"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-400">
-            {updateFiltered.length === 0 && (
-              <div className="text-gray-500 p-4">No update requests yet.</div>
-            )}
-            {updateFiltered.map((c) => (
-              <div key={c.id} className="inline-block mr-3">
-                <div
-                  className={`${cardMinWidth} ${cardHeight} bg-white rounded-2xl p-4 shadow-lg border`}
-                >
-                  <div className="font-semibold">{c.name}</div>
-                  <div className="text-xs text-gray-500">
-                    {c.id} • {c.poc}
-                  </div>
-                  <div className="mt-2 text-sm text-gray-600">
-                    {(c.updateRequests ?? []).map((u) => u.message).join(" • ")}
-                  </div>
-                  <div className="mt-3 flex gap-2">
-                    <button
-                      onClick={() => openBriefModal(c)}
-                      className="px-3 py-1 bg-indigo-600 text-white rounded"
-                    >
-                      Open Brief
-                    </button>
-                    <button
-                      onClick={() => alert("Open conversation (demo)")}
-                      className="px-3 py-1 border rounded"
-                    >
-                      View Messages
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {Array.from({
-              length: Math.max(0, 10 - updateFiltered.length),
-            }).map((_, i) => (
-              <div key={"upd-pad-" + i} className="inline-block mr-3">
-                <div
-                  className={`${cardMinWidth} ${cardHeight} bg-white/60 rounded-2xl p-4 border-dashed border-2 border-gray-200 text-gray-400 flex items-center justify-center`}
-                >
-                  Placeholder
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Completed */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="font-semibold">Completed & Declined</div>
-              <div className="text-xs text-gray-500">
-                Completed posts and declined invites
-              </div>
-            </div>
-            <div>
-              <input
-                value={searchCompleted}
-                onChange={(e) => setSearchCompleted(e.target.value)}
-                placeholder="Search by name or id"
-                className="p-2 border rounded"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-gray-400">
-            {completedFiltered.length === 0 && (
-              <div className="text-gray-500 p-4">
-                No completed items match your filters.
-              </div>
-            )}
-            {completedFiltered.map((c) => (
-              <div key={c.id} className="inline-block mr-3">
-                <div
-                  className={`${cardMinWidth} ${cardHeight} bg-white rounded-2xl p-4 shadow-lg border`}
-                >
-                  <div>
-                    <div className="font-semibold text-lg">{c.name}</div>
-                    <div className="text-xs text-gray-500">
-                      {c.id} • {c.poc}
-                    </div>
-                    <div className="mt-2 text-sm text-gray-600 line-clamp-3">
-                      {c.brief}
-                    </div>
-                  </div>
-                  <div className="mt-3 flex gap-2 justify-between items-center">
-                    <button
-                      onClick={() => openBriefModal(c)}
-                      className="px-3 py-1 bg-indigo-600 text-white rounded"
-                    >
-                      Open Brief
-                    </button>
-                    <button
-                      onClick={() => handlePaymentStatusClick(c)}
-                      className="px-3 py-1 border rounded"
-                    >
-                      Payment Status
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {Array.from({
-              length: Math.max(0, 10 - completedFiltered.length),
-            }).map((_, i) => (
-              <div key={"comp-pad-" + i} className="inline-block mr-3">
-                <div
-                  className={`${cardMinWidth} ${cardHeight} bg-white/60 rounded-2xl p-4 border-dashed border-2 border-gray-200 text-gray-400 flex items-center justify-center`}
-                >
-                  Placeholder
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
       </>
-    );};
+    );
+  };
 
   /* Render Payments module */
   const PaymentsModule = ({
@@ -2073,7 +2135,8 @@ export default function App() {
         )}
       </Modal>
     </div>
-);/* Creator Directory module render */
+  );
+  /* Creator Directory module render */
   const CreatorDirectoryModule = () => (
     <CreatorDirectory
       profile={profile}
@@ -2081,7 +2144,8 @@ export default function App() {
       socials={socials}
       onUpdateSocials={updateSocials}
     />
-  );/* Performance module (placeholder) */
+  );
+  /* Performance module (placeholder) */
   const PerformanceModule = () => (
     <div>
       <h2 className="text-lg font-semibold">Performance</h2>
@@ -2089,7 +2153,8 @@ export default function App() {
         Performance metrics placeholder (will link from posted campaigns).
       </div>
     </div>
-);/* Selected module render switch */
+  );
+  /* Selected module render switch */
   const renderSelected = () => {
     switch (selectedModule) {
       case "Creator Directory":
@@ -2097,24 +2162,26 @@ export default function App() {
       case "Communication":
         return (
           <>
-          <CommunicationsModule
-            campaigns={campaigns}
-            openBrief={openBriefModal}
-            activeChatCampaignId={activeChatCampaignId}
-            openChat={openChat}
-          />
+            <CommunicationsModule
+              campaigns={campaigns}
+              openBrief={openBriefModal}
+              activeChatCampaignId={activeChatCampaignId}
+              openChat={openChat}
+            />
           </>
-        );case "Campaigns & Contracts":
+        );
+      case "Campaigns & Contracts":
         return renderCampaignsModule();
       case "Payments":
         return (
           <>
-          <PaymentsModule
-            campaignToShow={paymentModalCampaign}
-            clearCampaignToShow={() => setPaymentModalCampaign(null)}
-          />
+            <PaymentsModule
+              campaignToShow={paymentModalCampaign}
+              clearCampaignToShow={() => setPaymentModalCampaign(null)}
+            />
           </>
-        );case "Performance":
+        );
+      case "Performance":
         return <PerformanceModule />;
       default:
         return <div>Not implemented</div>;
@@ -2124,66 +2191,67 @@ export default function App() {
   /* Brief modal & progress popup components usage */
   return (
     <>
-    <div className="min-h-screen flex flex-col">
-      <Header role={role} />
+      <div className="min-h-screen flex flex-col">
+        <Header role={role} />
 
-      <div className="flex flex-1">
-        <Sidebar
-          modules={modules}
-          selected={selectedModule}
-          onSelect={(m) => {
-            setSelectedModule(m);
-            setSelectedSub(subitems[m][0]);
-          }}
-          subitems={subitems}
-          selectedSub={selectedSub}
-          onSelectSub={(s) => setSelectedSub(s)}
-          role={role}
-          setRole={setRole}
-        />
+        <div className="flex flex-1">
+          <Sidebar
+            modules={modules}
+            selected={selectedModule}
+            onSelect={(m) => {
+              setSelectedModule(m);
+              setSelectedSub(subitems[m][0]);
+            }}
+            subitems={subitems}
+            selectedSub={selectedSub}
+            onSelectSub={(s) => setSelectedSub(s)}
+            role={role}
+            setRole={setRole}
+          />
 
-        <main className="flex-1 p-6 bg-gray-50 overflow-auto">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h1 className="text-2xl font-bold text-gray-800">
-                {selectedModule} —{" "}
-                <span className="text-indigo-600">{selectedSub}</span>
-              </h1>
-              <div className="text-sm text-gray-600">Creator Dashboard</div>
+          <main className="flex-1 p-6 bg-gray-50 overflow-auto">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h1 className="text-2xl font-bold text-gray-800">
+                  {selectedModule} —{" "}
+                  <span className="text-indigo-600">{selectedSub}</span>
+                </h1>
+                <div className="text-sm text-gray-600">Creator Dashboard</div>
+              </div>
+
+              <div>{renderSelected()}</div>
+
+              <div className="mt-8 text-xs text-gray-400">
+                This is a mock UI. All actions update local state only.
+              </div>
             </div>
+          </main>
+        </div>
 
-            <div>{renderSelected()}</div>
+        {/* Brief Modal */}
+        <Modal
+          open={briefOpen}
+          onClose={closeBriefModal}
+          title={briefCampaign ? `Brief — ${briefCampaign.name}` : "Brief"}
+          size="lg"
+        >
+          <BriefModalContent campaign={briefCampaign} />
+        </Modal>
 
-            <div className="mt-8 text-xs text-gray-400">
-              This is a mock UI. All actions update local state only.
-            </div>
-          </div>
-        </main>
+        {/* Progress Popup */}
+        <Modal
+          open={progressPopup.open}
+          onClose={() => setProgressPopup({ open: false, campaign: null })}
+          title={
+            progressPopup.campaign
+              ? `Progress — ${progressPopup.campaign.name}`
+              : "Progress"
+          }
+          size="md"
+        >
+          <ProgressPopupContent campaign={progressPopup.campaign} />
+        </Modal>
       </div>
-
-      {/* Brief Modal */}
-      <Modal
-        open={briefOpen}
-        onClose={closeBriefModal}
-        title={briefCampaign ? `Brief — ${briefCampaign.name}` : "Brief"}
-        size="lg"
-      >
-        <BriefModalContent campaign={briefCampaign} />
-      </Modal>
-
-      {/* Progress Popup */}
-      <Modal
-        open={progressPopup.open}
-        onClose={() => setProgressPopup({ open: false, campaign: null })}
-        title={
-          progressPopup.campaign
-            ? `Progress — ${progressPopup.campaign.name}`
-            : "Progress"
-        }
-        size="md"
-      >
-        <ProgressPopupContent campaign={progressPopup.campaign} />
-      </Modal>
-    </div>
     </>
-);}
+  );
+}
